@@ -19,5 +19,8 @@ const config = {
 
     // 绑定奖励
     bindReward:1000,
+
+    // 日常奖励
+    dayReward:100,
 };
 export default config;
