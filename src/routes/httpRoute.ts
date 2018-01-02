@@ -12,12 +12,16 @@ import testHandle from './testHandle';
 // import getVerifyCodeHandle from './getVerifyCodeHandle';
 // import regHandle from './regHandle';
 // import loginHandle from './loginHandle';
+import bindHandle from './bindHandle';
 
 const { rege } = config;
 
 export default function handler(app: express.Express) {
     // 测试
     testHandle(app);
+
+    // 绑定
+    bindHandle(app);
 
     // // 重名验证
     // checkSameUsernameHandle(app);

@@ -15,5 +15,9 @@ const config = {
 
     // 2天
     tokenExpires: 2 * 24 * 60 * 60 * 1000,
+
+
+    // 绑定奖励
+    bindReward:1000,
 };
 export default config;
