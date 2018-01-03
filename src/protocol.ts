@@ -75,6 +75,8 @@ export interface IReqItemList {
     canBuy: boolean,
 };
 export interface IResItemList {
+    // 是否正确查询到列表
+    flag:boolean,
     // 虚拟道具列表
     list: {
         // 道具编号

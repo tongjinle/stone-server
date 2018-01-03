@@ -23,4 +23,5 @@ const config = {
     // 日常奖励
     dayReward:100,
 };
+
 export default config;

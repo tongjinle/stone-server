@@ -13,6 +13,8 @@ import testHandle from './testHandle';
 // import regHandle from './regHandle';
 // import loginHandle from './loginHandle';
 import bindHandle from './bindHandle';
+import checkHandle from './checkHandle';
+import itemHandle from './itemHandle';
 
 const { rege } = config;
 
@@ -22,6 +24,9 @@ export default function handler(app: express.Express) {
 
     // 绑定
     bindHandle(app);
+
+    // 虚拟物品相关
+    itemHandle(app);
 
     // // 重名验证
     // checkSameUsernameHandle(app);
