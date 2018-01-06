@@ -1,3 +1,26 @@
+/*
+    *********************************************  
+                       _ooOoo_  
+                      o8888888o  
+                      88" . "88  
+                      (| -_- |)  
+                      O\  =  /O  
+                   ____/`---'\____  
+                 .'  \|     |//  `.  
+                /  \|||  :  |||//  \  
+               /  _||||| -:- |||||-  \  
+               |   | \\  -  /// |   |  
+               | \_|  ''\---/''  |   |  
+               \  .-\__  `-`  ___/-. /  
+             ___`. .'  /--.--\  `. . __  
+          ."" '<  `.___\_<|>_/___.'  >'"".  
+         | | :  `- \`.;`\ _ /`;.`/ - ` : | |  
+         \  \ `-.   \_ __\ /__ _/   .-` /  /  
+    ======`-.____`-.___\_____/___.-`____.-'======  
+                       `=---='  
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  
+               佛祖保佑       永无BUG  
+*/
 import * as Struct from './struct';
 
 // *** 基础response格式
@@ -14,7 +37,7 @@ interface IResBase {
 // 绑定id
 export interface IReqBind {
     openId: string,
-    dataId: string,
+    dotaId: number,
 };
 
 export interface IResBind extends IResBase {
@@ -25,6 +48,7 @@ export interface IResBind extends IResBase {
 
 // 查看用户个人信息
 export interface IReqUserInfo {
+    openId: string,
 };
 export interface IResUserInfo extends IResBase {
     // 错误码
@@ -35,7 +59,7 @@ export interface IResUserInfo extends IResBase {
     // 虚拟币
     coin?: number,
     // 第一次绑定时间戳,精确到毫秒
-    createDate?: number,
+    bindTime?: number,
 };
 
 

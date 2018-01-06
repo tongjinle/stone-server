@@ -16,14 +16,23 @@ import bindHandle from './bindHandle';
 import checkHandle from './checkHandle';
 import itemHandle from './itemHandle';
 
+// *** 仅仅在开发时期供前端刷新数据所用
+import devHandle from './devHandle';
+
 const { rege } = config;
 
 export default function handler(app: express.Express) {
+    // 开发
+    devHandle(app);
+
     // 测试
     testHandle(app);
 
     // 绑定
     bindHandle(app);
+
+    // 每日签到
+    checkHandle(app);
 
     // 虚拟物品相关
     itemHandle(app);
