@@ -23,7 +23,7 @@ export default function handle(app: express.Express) {
     app.post('/auth/bind', async (req, res) => {
         let resData: Protocol.IResBind;
         let { dotaId } = req.body as Protocol.IReqBind;
-        let openId: string = req.header('openId');
+        let openId: string = req.headers['openId'] as string;
         let code: number = undefined;
         let reward: number = config.bindReward;
 

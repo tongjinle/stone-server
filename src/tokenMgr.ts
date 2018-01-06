@@ -28,6 +28,7 @@ export default class TokenMgr {
     private dict: { [token: string]: { openId: string, expires: number, } };
     private constructor() {
         this.dict = {};
+        this.dict['testToken'] = { openId: 'puman', expires: new Date(2999, 0, 1).getTime(), };
     }
 
     private static ins: TokenMgr;

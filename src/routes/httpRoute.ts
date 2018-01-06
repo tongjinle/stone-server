@@ -25,16 +25,18 @@ const { rege } = config;
 
 export default function handler(app: express.Express) {
     // 检测/auth/路由下的访问权限
-    app.use(/\/auth\//, (req, res, next) => {
-        loger.debug('check auth');
-        let token: string = req.header('token');
-        if (!TokenMgr.getIns().check(token)) {
-            res.json({
-                code: 100,
-            });
-            return;
+    app.use((req, res, next) => {
+        if (/\/auth\//.test(req.path)) {
+            loger.debug('check auth');
+            let token: string = req.headers['token'] as string;
+            if (!TokenMgr.getIns().check(token)) {
+                res.json({
+                    code: 100,
+                });
+                return;
+            }
+            req.headers['openId'] = TokenMgr.getIns().get(token);
         }
-        req.headers['openId'] = TokenMgr.getIns().get(token);
         next();
     });
 
