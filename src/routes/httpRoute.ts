@@ -5,6 +5,7 @@ import config from '../config';
 // import TokenMgr from '../TokenMgr';
 // import DbMgr from '../dbMgr';
 import loger from '../logIns';
+import TokenMgr from '../tokenMgr';
 
 // 路由
 import testHandle from './testHandle';
@@ -15,6 +16,7 @@ import testHandle from './testHandle';
 import bindHandle from './bindHandle';
 import checkHandle from './checkHandle';
 import itemHandle from './itemHandle';
+import tokenHandle from './tokenHandle';
 
 // *** 仅仅在开发时期供前端刷新数据所用
 import devHandle from './devHandle';
@@ -22,8 +24,25 @@ import devHandle from './devHandle';
 const { rege } = config;
 
 export default function handler(app: express.Express) {
+    // 检测/auth/路由下的访问权限
+    app.use(/\/auth\//, (req, res, next) => {
+        loger.debug('check auth');
+        let token: string = req.header('token');
+        if (!TokenMgr.getIns().check(token)) {
+            res.json({
+                code: 100,
+            });
+            return;
+        }
+        req.headers['openId'] = TokenMgr.getIns().get(token);
+        next();
+    });
+
     // 开发
     devHandle(app);
+
+    // token
+    tokenHandle(app);
 
     // 测试
     testHandle(app);
@@ -49,7 +68,7 @@ export default function handler(app: express.Express) {
     // // 登录
     // loginHandle(app);
 
-    
+
 
 
 

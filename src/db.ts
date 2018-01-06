@@ -58,7 +58,6 @@ export default class Database {
 
     // 查询
 
-    /// 
     // 插入一个用户
     // 第一次绑定id
     async insertUser({ openId, dotaId, reward, bindTime, }: { openId: string, dotaId: number, reward: number, bindTime: number, }): Promise<{ flag: boolean, }> {
@@ -106,14 +105,19 @@ export default class Database {
         let flag: boolean = true;
         let begin: number = date;
         let end: number = date + 24 * 60 * 60 * 1000;
-        await this.checkRecordCollection.remove({ checkTime: { $gte: begin, $lt: end } });
+        await this.checkRecordCollection.remove({ openId, checkTime: { $gte: begin, $lt: end } });
         return { flag, };
     }
 
     // 查看某个时间段的某人签到记录
-    async getCheckRecord({ openId, begin, end, }: { openId: number, begin: number, end: number, }): Promise<{ flag: boolean, }> {
+    async getCheckRecord({ openId, begin, end, }: { openId: number, begin: number, end: number, }): Promise<{ flag: boolean, list?: { checkTime: number, reward: number, }[] }> {
         let flag: boolean = true;
-        return { flag, };
+        let checkRecordList = await (await this.checkRecordCollection.find({ checkTime: { $gte: begin, $lt: end }, openId, })).toArray();
+        let list: { checkTime: number, reward: number, }[] = checkRecordList.map(n => ({
+            checkTime: n.checkTime,
+            reward: n.reward,
+        }));
+        return { flag, list, };
     }
 
     // 插入一条dota2虚拟道具记录

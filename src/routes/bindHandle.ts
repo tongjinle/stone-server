@@ -20,9 +20,10 @@ enum eQueryUserInfoCode {
 
 
 export default function handle(app: express.Express) {
-    app.post('/bind', async (req, res) => {
+    app.post('/auth/bind', async (req, res) => {
         let resData: Protocol.IResBind;
-        let { openId, dotaId } = req.body as Protocol.IReqBind;
+        let { dotaId } = req.body as Protocol.IReqBind;
+        let openId: string = req.header('openId');
         let code: number = undefined;
         let reward: number = config.bindReward;
 
@@ -72,7 +73,7 @@ export default function handle(app: express.Express) {
             res.json(resData);
             return;
         }
-        resData = { code, dotaId:user.dotaId,coin:user.coin,bindTime:user.bindTime,};
+        resData = { code, dotaId: user.dotaId, coin: user.coin, bindTime: user.bindTime, };
         res.json(resData);
 
     });

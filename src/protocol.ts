@@ -33,10 +33,16 @@ interface IResBase {
     msg?: string,
 };
 
+export interface IReqToken {
+    code: number,
+}
+export interface IResToken extends IResBase {
+    token?: string,
+}
+
 
 // 绑定id
 export interface IReqBind {
-    openId: string,
     dotaId: number,
 };
 
@@ -66,6 +72,7 @@ export interface IResUserInfo extends IResBase {
 
 // 今日是否能签到
 export interface IReqCanCheck {
+
 };
 export interface IResCanCheck extends IResBase {
     // 今日是否能签到
