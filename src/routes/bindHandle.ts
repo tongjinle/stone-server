@@ -27,7 +27,9 @@ export default function handle(app: express.Express) {
         let reward: number = config.bindReward;
 
         // 正则
-        if (!rege.openId.test(openId) ||
+        if (openId === undefined ||
+            dotaId === undefined ||
+            !rege.openId.test(openId) ||
             !rege.dotaId.test(dotaId.toString())) {
             code = eBindCode.invalidFormat;
             resData = { code, };
