@@ -112,14 +112,16 @@ export interface IReqItemList {
 };
 export interface IResItemList extends IResBase {
     // 虚拟道具列表
-    list: {
-        // 道具编号
-        id: number,
+    list?: {
+        // 名称
+        name: string,
         // 图片
         src: string,
+        // 价格
+        coin: number,
     }[],
     // 总共的个数(道具个数,而不是页数)
-    totalCount: number,
+    totalCount?: number,
 };
 
 
