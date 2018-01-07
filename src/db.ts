@@ -152,7 +152,7 @@ export default class Database {
     // 价格区间
     // 页码
     async queryItem({ name, priceInterval, pageIndex, pageSize, }: { name: string, priceInterval: [number, number], pageIndex: number, pageSize: number, }): Promise<{ flag: boolean, list?: Schema.IItem[], totalCount?: number, }> {
-        let flag: boolean = true;
+    let flag: boolean = true;
         let list: Schema.IItem[];
         let totalCount: number;
         let filter: any = {};
