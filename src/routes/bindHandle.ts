@@ -57,7 +57,7 @@ export default function handle(app: express.Express) {
     app.get('/auth/user/info', async (req, res) => {
         let resData: Protocol.IResUserInfo;
         let code: number = undefined;
-        let { openId, } = req.query as Protocol.IReqUserInfo;
+        let openId: string = req.headers['openId'] as string;
         if (!rege.openId.test(openId)) {
             code = eQueryUserInfoCode.invalidFormat;
             resData = { code, };
