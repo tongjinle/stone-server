@@ -49,6 +49,7 @@ export default class Database {
     async open() {
         this.db = (await mongodb.MongoClient.connect(this.connectStr)).db('dota');
         this.userCollection = this.db.collection('user');
+        this.checkRecordCollection = this.db.collection('check');
     }
 
     async close() {
@@ -76,7 +77,7 @@ export default class Database {
     }
 
     // 删除一个用户
-    async removeUser({ openId, }: { openId: number, }): Promise<{ flag: boolean, }> {
+    async removeUser({ openId, }: { openId: string, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
         await this.userCollection.remove({ openId, });
         return { flag, };
@@ -92,7 +93,7 @@ export default class Database {
 
 
     // 插入一条签到记录
-    async insertCheckRecord({ openId, reward, checkTime, }: { openId: number, reward: number, checkTime: number, }): Promise<{ flag: boolean, }> {
+    async insertCheckRecord({ openId, reward, checkTime, }: { openId: string, reward: number, checkTime: number, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
         await this.checkRecordCollection.insertOne({ openId, reward, checkTime, });
         return { flag, }
@@ -101,7 +102,7 @@ export default class Database {
     // 删除一条签到记录
     // 条件:某天
     // date是某天0点的时间戳
-    async removeCheckRecord({ openId, date, }: { openId: number, date: number, }): Promise<{ flag: boolean, }> {
+    async removeCheckRecord({ openId, date, }: { openId: string, date: number, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
         let begin: number = date;
         let end: number = date + 24 * 60 * 60 * 1000;
@@ -110,7 +111,7 @@ export default class Database {
     }
 
     // 查看某个时间段的某人签到记录
-    async getCheckRecord({ openId, begin, end, }: { openId: number, begin: number, end: number, }): Promise<{ flag: boolean, list?: { checkTime: number, reward: number, }[] }> {
+    async getCheckRecord({ openId, begin, end, }: { openId: string, begin: number, end: number, }): Promise<{ flag: boolean, list?: { checkTime: number, reward: number, }[] }> {
         let flag: boolean = true;
         let checkRecordList = await (await this.checkRecordCollection.find({ checkTime: { $gte: begin, $lt: end }, openId, })).toArray();
         let list: { checkTime: number, reward: number, }[] = checkRecordList.map(n => ({
@@ -136,6 +137,11 @@ export default class Database {
     // *** dev ***
     async removeUserAll() {
         await this.userCollection.remove({});
+        return;
+    }
+
+    async removeCheckRecordAll(){
+        await this.checkRecordCollection.remove({});
         return;
     }
 

@@ -28,9 +28,23 @@ import Database from '../db';
 import * as rege from '../rege';
 
 export default function handle(app: express.Express) {
+    // 删除所有用户
     app.get('/dev/user/removeAll', async (req, res) => {
         let db = await Database.getIns();
         await db.removeUserAll();
         res.end('remove user all');
     });
+
+
+    // 删除所有签到记录
+    app.get('/dev/check/removeAll',async(req,res)=>{
+      let db = await Database.getIns();
+      await db.removeCheckRecordAll();
+      res.end('remove checkRecord all');
+    });
+
 };
+
+
+
+
