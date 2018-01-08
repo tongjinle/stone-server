@@ -60,7 +60,7 @@ export interface IShopRecord {
     // 2 废单
     status: number,
     // 备注
-    note: string,
+    note: { role: number, text: string, }[], 
 };
 
 

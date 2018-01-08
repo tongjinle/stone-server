@@ -126,9 +126,9 @@ export default class Database {
     }
 
     // 插入一条dota2虚拟道具记录
-    async insertItem({ name, coin,src, }: { name: string, coin: number,src:string, }): Promise<{ flag: boolean, }> {
+    async insertItem({ name, coin, src, }: { name: string, coin: number, src: string, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
-        await this.itemCollection.insert({ name, coin,src,});
+        await this.itemCollection.insert({ name, coin, src, });
         return { flag, };
     }
 
@@ -152,7 +152,7 @@ export default class Database {
     // 价格区间
     // 页码
     async queryItem({ name, priceInterval, pageIndex, pageSize, }: { name: string, priceInterval: [number, number], pageIndex: number, pageSize: number, }): Promise<{ flag: boolean, list?: Schema.IItem[], totalCount?: number, }> {
-    let flag: boolean = true;
+        let flag: boolean = true;
         let list: Schema.IItem[];
         let totalCount: number;
         let filter: any = {};
@@ -173,28 +173,32 @@ export default class Database {
 
     // 新增订单
     // 兑换dota2虚拟道具
-    async insertShopRecord({ openId, itemName, buyTime, }: { openId: string, itemName: string, buyTime: number, }): Promise<{ flag: boolean, }> {
+    async buyShopRecord({ openId, itemName, buyTime, }: { openId: string, itemName: string, buyTime: number, }): Promise<{ flag: boolean, shopId?: string, }> {
         let flag: boolean = true;
 
         let status: number = 0;
         let dealTime: number = undefined;
-        let note: string = '';
+        let note:{role:number,text:string,}[]=[];
         let record: Schema.IShopRecord = { openId, itemName, buyTime, dealTime, status, note, };
-        await this.shopRecordCollection.insertOne(record);
-        return { flag, };
+        let {insertedCount, insertedId: shopId } = await this.shopRecordCollection.insertOne(record);
+
+        flag = insertedCount == 1;
+        return { flag, shopId: shopId.toHexString(), };
     }
 
-    // 更新订单
-    // 处理dota2虚拟道具
-    async updateShopRecord({ shopId, dealTime, status, }: { shopId: string, dealTime: number, status: number, }): Promise<{ flag: boolean, }> {
+    // 处理订单
+    // status==1,成功处理dota2虚拟道具
+    // status==2,取消订单,退换coin给玩家
+    async dealShopRecord({ shopId, dealTime,status, }: { shopId: string, dealTime: number, status: number, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
+        let {upsertedCount,} = await this.shopRecordCollection.updateOne({ shopId, status: 0, }, { $set: { dealTime, status, } });
 
-        await this.shopRecordCollection.updateOne({ shopId, }, { $set: { dealTime, status, } });
-
+        flag = upsertedCount == 1;
         return { flag, };
 
     }
 
+   
     // 追加note到订单中
     async updateShopRecordNote({ shopId, note, }: { shopId: string, note: { openId: string, text: string, } }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
@@ -221,7 +225,7 @@ export default class Database {
         return;
     }
 
-    async removeItemAll(){
+    async removeItemAll() {
         await this.itemCollection.remove({});
         return;
     }
