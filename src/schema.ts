@@ -27,7 +27,7 @@ export interface IUser {
     dotaId: number,
     coin: number,
     bindTime: number,
-
+    currRoomId:string,
 };
 
 // 签到记录
@@ -64,7 +64,7 @@ export interface IShopRecord {
 };
 
 // 黑店房间成绩
-interface IScore {
+export interface IScore {
     // 胜利
     win: number,
     // 失败

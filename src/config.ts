@@ -28,10 +28,15 @@ const config = {
     // 日常奖励
     dayReward: 100,
 
+    // 加入黑店结束时间,5min
+    roomEndTime: 5 * MIN,
+
+    // 可以评论黑店时间,1小时到3小时
+    commentBeginTime: HOUR,
+    commentEndTime: 3 * HOUR,
 
     // *** 数据库
-    connectStr:'mongodb://localhost:27017/dota',
-
+    connectStr: 'mongodb://localhost:27017/dota',
 
 };
 

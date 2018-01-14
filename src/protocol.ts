@@ -91,8 +91,8 @@ export interface IResCheck extends IResBase {
 
 // 使用虚拟币兑换游戏中的虚拟道具
 export interface IReqBuyItem {
-    // 虚拟道具编号
-    id: number,
+    // 虚拟道具名
+    name: string,
 };
 export interface IResBuyItem extends IResBase {
     // 错误码
@@ -137,7 +137,7 @@ export interface IResCreateRoom extends IResBase {
     // 0 用户已经创建了黑店
     // 1 用户已经参加了其他人的黑店
     // 房间编号
-    id?: number,
+    id?: string,
 };
 
 

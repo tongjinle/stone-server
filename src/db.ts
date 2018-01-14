@@ -156,12 +156,19 @@ export default class Database {
         return { flag, };
     }
 
+    // 查找虚拟道具
+    async queryItem({ name, }: { name: string, }): Promise<{ flag: boolean, item?: Schema.IItem }> {
+        let flag: boolean = true;
+        let item = await this.itemCollection.findOne({ name, });
+        flag = !!item;
+        return { flag, item, };
+    }
 
     // 查询dota2虚拟道具
     // 模糊查询name
     // 价格区间
     // 页码
-    async queryItem({ name, priceInterval, pageIndex, pageSize, }: { name: string, priceInterval: [number, number], pageIndex: number, pageSize: number, }): Promise<{ flag: boolean, list?: Schema.IItem[], totalCount?: number, }> {
+    async queryItemList({ name, priceInterval, pageIndex, pageSize, }: { name: string, priceInterval: [number, number], pageIndex: number, pageSize: number, }): Promise<{ flag: boolean, list?: Schema.IItem[], totalCount?: number, }> {
         let flag: boolean = true;
         let list: Schema.IItem[];
         let totalCount: number;
@@ -233,9 +240,24 @@ export default class Database {
     }
 
     // 更新战绩
-    // 评价黑店
-    async commentRoom({ }: {}): Promise<{ flag: boolean, }> {
+    async updateRoomScore({ roomId, score, }: { roomId: string, score: Schema.IScore }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
+        let { upsertedCount, } = await this.roomCollection.updateOne({ roomId, }, { $set: { score, } });
+
+        flag = upsertedCount == 1;
+        return { flag, };
+    }
+
+    // 评价黑店
+    async commentRoom({ roomId, openId, comment, }: { roomId: string, openId: string, comment: number, }): Promise<{ flag: boolean, }> {
+        let flag: boolean = true;
+
+        let key: string = ({ '1': 'good', '0': 'normal', '-1': 'bad', } as { [index: string]: string })[comment.toString()] as string;
+        let inc = { [key]: 1 };
+
+        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $inc: inc });
+
+        flag = upsertedCount == 1;
         return { flag, };
     }
 
@@ -256,6 +278,14 @@ export default class Database {
     }
 
     // 查询黑店历史
+    async queryRoomList({ openId, pageIndex, pageSize }: { openId: string, pageIndex: number, pageSize: number, }): Promise<{ flag: boolean, list?: Schema.IRoom[], totalCount?: number, }> {
+        let flag: boolean = true;
+        let query = await this.roomCollection.find({ owner: openId, });
+        let totalCount = await query.count();
+        let list = await query.skip(pageIndex * pageSize).limit(pageSize).toArray();
+        return { flag, totalCount, list, };
+
+    }
 
 
     // *** dev ***
