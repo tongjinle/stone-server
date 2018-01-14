@@ -33,6 +33,7 @@ export default class Database {
     private checkRecordCollection: mongodb.Collection<Schema.ICheckRecord>;
     private itemCollection: mongodb.Collection<Schema.IItem>;
     private shopRecordCollection: mongodb.Collection<Schema.IShopRecord>;
+    private roomCollection: mongodb.Collection<Schema.IRoom>;
 
     // 返回一个连接实例
     private static ins: Database;
@@ -54,6 +55,7 @@ export default class Database {
         this.checkRecordCollection = this.db.collection('checkRecord');
         this.itemCollection = this.db.collection('item');
         this.shopRecordCollection = this.db.collection('shopRecord');
+        this.roomCollection = this.db.collection('room');
     }
 
     async close() {
@@ -77,6 +79,14 @@ export default class Database {
     async updateUser({ openId, dotaId }: { openId: string, dotaId: number, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
         await this.userCollection.updateOne({ openId, }, { $set: { dotaId, } });
+        return { flag, };
+    }
+
+    // 修改一个用户的coin
+    // coinDelta coin增量
+    async updateUserCoin({ openId, coinDelta, }: { openId: string, coinDelta: number, }): Promise<{ flag: boolean, }> {
+        let flag: boolean = true;
+        await this.userCollection.updateOne({ openId, }, { $inc: { coin: coinDelta, } });
         return { flag, };
     }
 
@@ -173,32 +183,33 @@ export default class Database {
 
     // 新增订单
     // 兑换dota2虚拟道具
-    async buyShopRecord({ openId, itemName, buyTime, }: { openId: string, itemName: string, buyTime: number, }): Promise<{ flag: boolean, shopId?: string, }> {
+    async insertShopRecord({ openId, itemName, buyTime, }: { openId: string, itemName: string, buyTime: number, }): Promise<{ flag: boolean, shopId?: string, }> {
         let flag: boolean = true;
 
         let status: number = 0;
         let dealTime: number = undefined;
-        let note:{role:number,text:string,}[]=[];
+        let note: { role: number, text: string, }[] = [];
         let record: Schema.IShopRecord = { openId, itemName, buyTime, dealTime, status, note, };
-        let {insertedCount, insertedId: shopId } = await this.shopRecordCollection.insertOne(record);
+        let { insertedCount, insertedId, } = await this.shopRecordCollection.insertOne(record);
 
         flag = insertedCount == 1;
-        return { flag, shopId: shopId.toHexString(), };
+        let shopId: string = flag ? insertedId.toHexString() : undefined;
+        return { flag, shopId, };
     }
 
     // 处理订单
     // status==1,成功处理dota2虚拟道具
     // status==2,取消订单,退换coin给玩家
-    async dealShopRecord({ shopId, dealTime,status, }: { shopId: string, dealTime: number, status: number, }): Promise<{ flag: boolean, }> {
+    async updateShopRecord({ shopId, dealTime, status, }: { shopId: string, dealTime: number, status: number, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
-        let {upsertedCount,} = await this.shopRecordCollection.updateOne({ shopId, status: 0, }, { $set: { dealTime, status, } });
+        let { upsertedCount, } = await this.shopRecordCollection.updateOne({ shopId, status: 0, }, { $set: { dealTime, status, } });
 
         flag = upsertedCount == 1;
         return { flag, };
 
     }
 
-   
+
     // 追加note到订单中
     async updateShopRecordNote({ shopId, note, }: { shopId: string, note: { openId: string, text: string, } }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
@@ -209,8 +220,41 @@ export default class Database {
 
 
     // 创建黑店
+    async insertRoom({ openId, count, coin, beginTime, endTime, commentDuration, }: { openId: string, count: number, coin: number, beginTime: number, endTime: number, commentDuration: [number, number], }): Promise<{ flag: boolean, roomId?: string, }> {
+        let flag: boolean = true;
+        let mateList: string[] = [];
+        let comment = { good: 0, normal: 0, bad: 0, };
+        let room: Schema.IRoom = { count, coin, beginTime, endTime, owner: openId, mateList, commentDuration, comment, };
+        let { insertedId, insertedCount, } = await this.roomCollection.insertOne(room);
+
+        flag = insertedCount == 1;
+        let roomId: string = flag ? insertedId.toHexString() : undefined;
+        return { flag, roomId, };
+    }
+
+    // 更新战绩
     // 评价黑店
+    async commentRoom({ }: {}): Promise<{ flag: boolean, }> {
+        let flag: boolean = true;
+        return { flag, };
+    }
+
     // 加入黑店
+    async applyRoom({ roomId, openId, }: { roomId: string, openId: string, }): Promise<{ flag: boolean, }> {
+        let flag: boolean = true;
+        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId) }, { $push: { mateList: openId } });
+        flag = upsertedCount == 1;
+        return { flag, };
+
+    }
+
+    // 查找黑店
+    async queryRoom({ roomId, }: { roomId: string, }): Promise<{ flag: boolean, room?: Schema.IRoom }> {
+        let flag: boolean = true;
+        let room = await this.roomCollection.findOne({ _id: new mongodb.ObjectId(roomId), });
+        return { flag, room, };
+    }
+
     // 查询黑店历史
 
 

@@ -43,12 +43,16 @@ export default function handle(app: express.Express) {
         if (await hasCheck(openId)) {
             code = 0;
             resData = { code, }
+            res.json(resData);
             return;
         }
 
         let db = await Database.getIns();
         let checkTime: number = Date.now();
-        db.insertCheckRecord({ openId, reward, checkTime, });
+        let { flag, } = await db.insertCheckRecord({ openId, reward, checkTime, });
+        if (flag) {
+            await db.updateUserCoin({ openId, coinDelta: reward, });
+        }
         resData = { code, reward, };
         res.json(resData);
     });
