@@ -95,11 +95,10 @@ export interface IRoom {
     // 备注下,"元组"数据类型,下面的表示数组就只有2个元素,且都是number类型
     commentDuration: [number, number],
     // 成员以及成员的评价
-    comment: {
-        good: number,
-        normal: number,
-        bad: number,
-    },
+    commentList: {
+        openId:string,
+        comment:number,
+    }[],
     // 战绩统计,统计方式待定
     score?: IScore, 
 

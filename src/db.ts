@@ -230,8 +230,8 @@ export default class Database {
     async insertRoom({ openId, count, coin, beginTime, endTime, commentDuration, }: { openId: string, count: number, coin: number, beginTime: number, endTime: number, commentDuration: [number, number], }): Promise<{ flag: boolean, roomId?: string, }> {
         let flag: boolean = true;
         let mateList: string[] = [];
-        let comment = { good: 0, normal: 0, bad: 0, };
-        let room: Schema.IRoom = { count, coin, beginTime, endTime, owner: openId, mateList, commentDuration, comment, };
+        let commentList: { openId: string, comment: number, }[] = [];
+        let room: Schema.IRoom = { count, coin, beginTime, endTime, owner: openId, mateList, commentDuration, commentList, };
         let { insertedId, insertedCount, } = await this.roomCollection.insertOne(room);
 
         flag = insertedCount == 1;
@@ -255,7 +255,7 @@ export default class Database {
         let key: string = ({ '1': 'good', '0': 'normal', '-1': 'bad', } as { [index: string]: string })[comment.toString()] as string;
         let inc = { [key]: 1 };
 
-        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $inc: inc });
+        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $push: { openId, comment, } });
 
         flag = upsertedCount == 1;
         return { flag, };

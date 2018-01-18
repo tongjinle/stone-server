@@ -144,7 +144,7 @@ export interface IResCreateRoom extends IResBase {
 // 通过黑店编号获取黑店信息
 export interface IReqRoomInfo {
     // 如果不注明,表示查询用户的当前黑店
-    roomId?: number,
+    roomId?: string,
 };
 export interface IResRoomInfo extends IResBase {
     // 错误码
@@ -158,11 +158,10 @@ export interface IResRoomInfo extends IResBase {
 // 请求加入黑店
 export interface IReqApplyRoom {
     // 黑店编号
-    roomId: number,
+    roomId: string,
 };
 export interface IResApplyRoom extends IResBase {
-    // 是否成功加入
-    flag: boolean,
+    
     // 错误码
     // 0 用户coin不够支付
     // 1 黑店不存在
@@ -176,7 +175,7 @@ export interface IResApplyRoom extends IResBase {
 // 评价黑店
 export interface IReqCommentRoom {
     // 黑店编号
-    roomId: number,
+    roomId: string,
     // 评价
     // 1 好评(默认评价)
     // 0 普通

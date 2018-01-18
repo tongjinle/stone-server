@@ -9,6 +9,43 @@ enum eCreateRoomCode {
     hasCreated,
     // 已经加入他人的黑店
     hasJoined,
+};
+
+enum eQueryRoomCode {
+    notExists,
+};
+
+enum eApplyRoomCode {
+    notEnoughCoin,
+    notExists,
+    expires,
+};
+
+enum eCommentRoomCode {
+    notExists,
+    noRight,
+    expries,
+}
+
+enum eComment {
+    good = 1,
+    normal = 0,
+    bad = -1,
+};
+
+
+
+function formatCommentList(commentList: { openId: string, comment: number, }[]): Struct.IComment {
+    return commentList.reduce((prev, n, i) => {
+        if (n.comment == eComment.good) {
+            prev.good++;
+        } else if (n.comment == eComment.bad) {
+            prev.bad++;
+        } else if (n.comment == eComment.normal) {
+            prev.normal++;
+        }
+        return prev;
+    }, { good: 0, normal: 0, bad: 0, });
 }
 
 export default function handle(app: express.Express) {
@@ -18,24 +55,14 @@ export default function handle(app: express.Express) {
         let { count, coin, } = req.body as Protocol.IReqCreateRoom;
         let code: number = undefined;
 
-        let openId: string = req.headers['openId'] as string;
 
         let db = await Database.getIns();
-        let { user } = await db.queryUser({ openId, });
-        // 存在当前黑店
-        if (user.currRoomId != undefined) {
-            let { room } = await db.queryRoom({ roomId: user.currRoomId, });
-
-            code = !!room ? eCreateRoomCode.hasCreated : eCreateRoomCode.hasJoined;
-            resData = { code, };
-            res.json(resData);
-            return;
-        }
 
         let beginTime: number = Date.now(),
             endTime: number = beginTime + config.roomEndTime,
             commentDuration: [number, number] = [beginTime + config.commentBeginTime, beginTime + config.commentEndTime];
 
+        let openId: string = req.headers['openId'] as string;
         let { roomId, } = await db.insertRoom({ openId, count, coin, beginTime, endTime, commentDuration, });
         resData = { code, id: roomId, };
         res.json(resData);
@@ -43,46 +70,115 @@ export default function handle(app: express.Express) {
 
     // 通过黑店编号获取黑店信息
     app.get('/auth/room/info', async (req, res) => {
+        let resData: Protocol.IResRoomInfo;
         let { roomId, } = req.query as Protocol.IReqRoomInfo;
         let code: number = undefined;
         let info: Struct.IRoomInfo;
 
-        //
-        {
-            let begin: number = Date.now();
-            let end: number = begin + 5 * 60 * 1000;
-            let h = 60 * 60 * 1000;
-            let commentDuration: [number, number] = [end + h, end + 5 * h];
-            info = {
-                roomId: 1001,
-                coin: 50,
-                begin,
-                end,
-                commentDuration,
-                commentList: undefined,
-                score: undefined,
-            };
+        let db = await Database.getIns();
+        let { flag, room, } = await db.queryRoom({ roomId, });
+
+        if (!room) {
+            code = eQueryRoomCode.notExists;
+            resData = { code, };
+            res.json(resData);
+            return;
         }
-        let reward: number = config.dayReward;
-        let data: Protocol.IResRoomInfo = { code, info, };
-        res.json(data);
+
+        let comment: Struct.IComment = formatCommentList(room.commentList);
+        info = {
+            roomId,
+            count: room.count,
+            coin: room.coin,
+            beginTime: room.beginTime,
+            endTime: room.endTime,
+            commentDuration: room.commentDuration,
+            comment,
+            score: room.score,
+        };
+
+        resData = { code, info, };
+        res.json(resData);
     });
 
     // 请求加入黑店
     app.post('/auth/room/apply', async (req, res) => {
+        let resData: Protocol.IResApplyRoom;
         let { roomId, } = req.body as Protocol.IReqApplyRoom;
-        let flag: boolean = true;
         let code: number = undefined;
-        let data: Protocol.IResApplyRoom = { flag, code, };
-        res.json(data);
+
+        let db = await Database.getIns();
+        let { room, } = await db.queryRoom({ roomId, });
+
+        // 黑店不存在
+        if (!room) {
+            res.json({ code: eApplyRoomCode.notExists, msg: '黑店不存在', });
+            return;
+        }
+
+        // coin不够
+        let openId: string = req.headers['openId'] as string;
+        let { user, } = await db.queryUser({ openId, });
+        if (user.coin < room.coin) {
+            res.json({ code: eApplyRoomCode.notEnoughCoin, msg: 'coin不足', });
+            return;
+        }
+
+        // 黑店已经超过了申请时间
+        {
+            let now = Date.now();
+            if (room.endTime < now) {
+                res.json({ code: eApplyRoomCode.expires, msg: '黑店已经超过了申请时间', });
+                return;
+            }
+
+        }
+
+        await db.applyRoom({ roomId, openId, });
+        resData = { code, };
+        res.json(resData);
     });
 
     // 评价黑店
     app.post('/auth/room/comment', async (req, res) => {
         let { roomId, comment, } = req.body as Protocol.IReqCommentRoom;
         let code: number = undefined;
-        let data: Protocol.IResCommentRoom = { code, };
-        res.json(data);
+        let resData: Protocol.IResCommentRoom;
+        let openId: string = req.headers['openId'] as string;
+        
+        let db = await Database.getIns();
+        let { room, } = await db.queryRoom({ roomId, });
+
+        // 黑店不存在
+        if (!room) {
+            res.json({ code: eCommentRoomCode.notExists, msg: '黑店不存在', });
+            return;
+        }
+
+        // 不是用户的黑店
+        {
+            let { user, } = await db.queryUser({ openId, });
+            if (user.currRoomId != roomId || room.owner == openId) {
+                res.json({ code: eCommentRoomCode.noRight, msg: '非该黑店新人', });
+                return;
+            }
+
+
+        }
+
+        // 评价时间不匹配
+        {
+            let now = Date.now();
+            if (now < room.commentDuration[0] || now > room.commentDuration[1]) {
+                res.json({ code: eCommentRoomCode.expries, msg: '不在可以评价的时间内' });
+                return;
+            }
+        }
+
+        await db.commentRoom({ roomId, openId, comment, });
+
+        resData = { code, };
+        res.json(resData);
     });
 
 
@@ -91,7 +187,6 @@ export default function handle(app: express.Express) {
         let { pageIndex, pageSize, } = req.body as Protocol.IReqRoomHistory;
         let code: number = undefined;
         let list: Struct.IRoomRusume[] = [];
-
 
         //
         {

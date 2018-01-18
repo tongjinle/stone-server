@@ -6,6 +6,7 @@ import config from '../config';
 // import DbMgr from '../dbMgr';
 import loger from '../logIns';
 import TokenMgr from '../tokenMgr';
+import Database from '../db';
 
 // 路由
 import testHandle from './testHandle';
@@ -25,6 +26,8 @@ const { rege } = config;
 
 export default function handler(app: express.Express) {
     // 检测/auth/路由下的访问权限
+    // 检查有没有合法的token
+    // 错误码 100
     app.use((req, res, next) => {
         if (/\/auth\//.test(req.path)) {
             loger.debug('check auth');
@@ -37,8 +40,39 @@ export default function handler(app: express.Express) {
             }
             req.headers['openId'] = TokenMgr.getIns().get(token);
         }
+
+
         next();
     });
+
+    // 某些黑店操作,需要用户没有当前黑店
+    // 错误码 200
+    app.use(async (req, res, next) => {
+        let matchList = [
+            /\/auth\/room\/create/,
+            /\/auth\/room\/comment/,
+            /\/auth\/room\/apply/,
+        ];
+
+        if (matchList.some(n => n.test(req.path))) {
+            let db = await Database.getIns();
+
+            let openId: string = req.headers['openId'] as string;
+            let { user } = await db.queryUser({ openId, });
+            // 存在当前黑店
+            if (user.currRoomId != undefined) {
+                let { room } = await db.queryRoom({ roomId: user.currRoomId, });
+                if(!!room){
+                    let code:number = 200;
+                    res.json({code,    });
+                    return;
+                }
+            }
+        }
+        next();
+    });
+
+
 
     // 开发
     devHandle(app);
