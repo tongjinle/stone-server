@@ -38,6 +38,12 @@ const config = {
     // *** 数据库
     connectStr: 'mongodb://localhost:27017/dota',
 
+    // 微信
+    wx:{
+        appId:'',
+        appSecrect:'',
+    },
+
 };
 
 export default config;

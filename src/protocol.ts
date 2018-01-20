@@ -161,7 +161,7 @@ export interface IReqApplyRoom {
     roomId: string,
 };
 export interface IResApplyRoom extends IResBase {
-    
+
     // 错误码
     // 0 用户coin不够支付
     // 1 黑店不存在
@@ -204,7 +204,15 @@ export interface IResRoomHistory extends IResBase {
     list?: Struct.IRoomRusume[],
 }
 
+// 微信 请求用户信息 
+export interface IReqWxUserInfo {
+    code: string,
+}
 
+
+export interface IResWxUserInfo extends IResBase {
+    openId?: string,
+}
 
 
 

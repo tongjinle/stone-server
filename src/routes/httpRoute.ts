@@ -18,6 +18,9 @@ import bindHandle from './bindHandle';
 import checkHandle from './checkHandle';
 import itemHandle from './itemHandle';
 import tokenHandle from './tokenHandle';
+import roomHandle from './roomHandle';
+import wxHandle from './wxHandle';
+
 
 // *** 仅仅在开发时期供前端刷新数据所用
 import devHandle from './devHandle';
@@ -92,20 +95,10 @@ export default function handler(app: express.Express) {
     // 虚拟物品相关
     itemHandle(app);
 
-    // // 重名验证
-    // checkSameUsernameHandle(app);
+    // 黑店
+    roomHandle(app);
 
-    // // 验证码
-    // getVerifyCodeHandle(app);
-
-    // // 注册
-    // regHandle(app);
-
-    // // 登录
-    // loginHandle(app);
-
-
-
-
+    // 微信
+    wxHandle(app);
 
 }
