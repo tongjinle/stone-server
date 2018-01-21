@@ -43,7 +43,7 @@ export interface IResToken extends IResBase {
 
 // 绑定id
 export interface IReqBind {
-    dotaId: number,
+    dotaId: string,
 };
 
 export interface IResBind extends IResBase {
@@ -61,7 +61,7 @@ export interface IResUserInfo extends IResBase {
     // 0 不存在此人
 
     // dota数字id
-    dotaId?: number,
+    dotaId?: string,
     // 虚拟币
     coin?: number,
     // 第一次绑定时间戳,精确到毫秒

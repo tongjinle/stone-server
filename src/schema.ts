@@ -24,7 +24,7 @@
 // 绑定信息
 export interface IUser {
     openId: string,
-    dotaId: number,
+    dotaId: string,
     coin: number,
     bindTime: number,
     currRoomId:string,
@@ -87,8 +87,10 @@ export interface IRoom {
     // *** 黑店成员 ***
     // 店主的openId
     owner: string,
+    // 店主的dotaId
+    ownerDotaId:string,
     // 新人们的openId
-    mateList: string[],
+    mateList: {openId:string,dotaId:string,}[],
 
     // *** 新人们的评价 ***
     // 可以评价的时间

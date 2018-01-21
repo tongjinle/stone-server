@@ -63,7 +63,9 @@ export default function handle(app: express.Express) {
             commentDuration: [number, number] = [beginTime + config.commentBeginTime, beginTime + config.commentEndTime];
 
         let openId: string = req.headers['openId'] as string;
-        let { roomId, } = await db.insertRoom({ openId, count, coin, beginTime, endTime, commentDuration, });
+        let { user, } = await db.queryUser({ openId, });
+        let dotaId = user.dotaId;
+        let { roomId, } = await db.insertRoom({ openId, dotaId, count, coin, beginTime, endTime, commentDuration, });
         resData = { code, id: roomId, };
         res.json(resData);
     });
@@ -86,6 +88,7 @@ export default function handle(app: express.Express) {
         }
 
         let comment: Struct.IComment = formatCommentList(room.commentList);
+        let owner = room.owner
         info = {
             roomId,
             count: room.count,
@@ -95,6 +98,8 @@ export default function handle(app: express.Express) {
             commentDuration: room.commentDuration,
             comment,
             score: room.score,
+            owner: room.ownerDotaId,
+            mateList: room.mateList.map(n => n.dotaId),
         };
 
         resData = { code, info, };
@@ -134,7 +139,8 @@ export default function handle(app: express.Express) {
 
         }
 
-        await db.applyRoom({ roomId, openId, });
+        let dotaId: string = user.dotaId;
+        await db.applyRoom({ roomId, openId, dotaId, });
         resData = { code, };
         res.json(resData);
     });
@@ -145,7 +151,7 @@ export default function handle(app: express.Express) {
         let code: number = undefined;
         let resData: Protocol.IResCommentRoom;
         let openId: string = req.headers['openId'] as string;
-        
+
         let db = await Database.getIns();
         let { room, } = await db.queryRoom({ roomId, });
 

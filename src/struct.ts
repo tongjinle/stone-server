@@ -30,6 +30,11 @@ export interface IRoomInfo {
     comment: IComment,
     // 战绩统计,统计方式待定
     score?: IRoomScore,
+    // 店主的dotaId
+    owner: string,
+    // 新人们的dotaId
+    mateList: string[],
+
 }
 
 // 黑店总结

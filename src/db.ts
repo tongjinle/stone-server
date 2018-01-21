@@ -67,7 +67,7 @@ export default class Database {
 
     // 插入一个用户
     // 第一次绑定id
-    async insertUser({ openId, dotaId, reward, bindTime, }: { openId: string, dotaId: number, reward: number, bindTime: number, }): Promise<{ flag: boolean, }> {
+    async insertUser({ openId, dotaId, reward, bindTime, }: { openId: string, dotaId: string, reward: number, bindTime: number, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
         await this.userCollection.insertOne({ openId, dotaId, coin: reward, bindTime, });
         return { flag, };
@@ -76,7 +76,7 @@ export default class Database {
 
     // 修改一个用户
     // 再次绑定(即修改dotaId)
-    async updateUser({ openId, dotaId }: { openId: string, dotaId: number, }): Promise<{ flag: boolean, }> {
+    async updateUser({ openId, dotaId }: { openId: string, dotaId: string, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
         await this.userCollection.updateOne({ openId, }, { $set: { dotaId, } });
         return { flag, };
@@ -227,11 +227,11 @@ export default class Database {
 
 
     // 创建黑店
-    async insertRoom({ openId, count, coin, beginTime, endTime, commentDuration, }: { openId: string, count: number, coin: number, beginTime: number, endTime: number, commentDuration: [number, number], }): Promise<{ flag: boolean, roomId?: string, }> {
+    async insertRoom({ openId, dotaId, count, coin, beginTime, endTime, commentDuration, }: { openId: string, dotaId: string, count: number, coin: number, beginTime: number, endTime: number, commentDuration: [number, number], }): Promise<{ flag: boolean, roomId?: string, }> {
         let flag: boolean = true;
-        let mateList: string[] = [];
+        let mateList: { openId: string, dotaId: string, }[] = [];
         let commentList: { openId: string, comment: number, }[] = [];
-        let room: Schema.IRoom = { count, coin, beginTime, endTime, owner: openId, mateList, commentDuration, commentList, };
+        let room: Schema.IRoom = { count, coin, beginTime, endTime, owner: openId, ownerDotaId: dotaId, mateList, commentDuration, commentList, };
         let { insertedId, insertedCount, } = await this.roomCollection.insertOne(room);
 
         flag = insertedCount == 1;
@@ -262,9 +262,9 @@ export default class Database {
     }
 
     // 加入黑店
-    async applyRoom({ roomId, openId, }: { roomId: string, openId: string, }): Promise<{ flag: boolean, }> {
+    async applyRoom({ roomId, openId, dotaId, }: { roomId: string, openId: string, dotaId: string, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
-        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId) }, { $push: { mateList: openId } });
+        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId) }, { $push: { mateList: { openId, dotaId, }, } });
         flag = upsertedCount == 1;
         return { flag, };
 
