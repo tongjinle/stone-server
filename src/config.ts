@@ -39,9 +39,12 @@ const config = {
     connectStr: 'mongodb://localhost:27017/dota',
 
     // 微信
+    // 是否mock openId
+    isMockOpenId:true,
+    // appId和appSecret
     wx:{
         appId:'',
-        appSecrect:'',
+        appSecret:'',
     },
 
 };

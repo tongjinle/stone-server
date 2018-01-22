@@ -34,7 +34,7 @@ interface IResBase {
 };
 
 export interface IReqToken {
-    code: number,
+    code: string,
 }
 export interface IResToken extends IResBase {
     token?: string,

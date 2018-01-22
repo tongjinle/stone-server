@@ -19,7 +19,6 @@ import checkHandle from './checkHandle';
 import itemHandle from './itemHandle';
 import tokenHandle from './tokenHandle';
 import roomHandle from './roomHandle';
-import wxHandle from './wxHandle';
 
 
 // *** 仅仅在开发时期供前端刷新数据所用
@@ -98,7 +97,6 @@ export default function handler(app: express.Express) {
     // 黑店
     roomHandle(app);
 
-    // 微信
-    wxHandle(app);
+   
 
 }

@@ -2,7 +2,27 @@ import * as express from 'express';
 import * as Protocol from '../protocol';
 import config from '../config';
 import TokenMgr from '../tokenMgr';
+import axios from 'axios';
 
+// 通过code获取微信用户信息
+async function getUserInfo(code: string, ): Promise<string> {
+    let ret: string;
+    let { appId, appSecret, } = config.wx;
+    let url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code"`;
+    try {
+        let { data, } = await axios.get(url, );
+        if (data.errcode) {
+            return undefined;
+        } else {
+            return data.openId;
+        }
+    } catch (e) {
+        return undefined;
+
+    } finally {
+
+    }
+};
 
 export default function handle(app: express.Express) {
     app.get('/getToken', async (req, res) => {
@@ -12,7 +32,16 @@ export default function handle(app: express.Express) {
 
         // mock openId
         // 其实应该从微信服务器拿到的
-        let openId = (Math.floor(10e8 * Math.random())).toString(16).slice(0, 8);
+        let openId = config.isMockOpenId ? 'mockOpenId' : await getUserInfo(cliCode);
+
+        // 获取openId失败
+        if (!openId) {
+            code = 0;
+            resData = { code, };
+            res.json(resData);
+            return;
+        }
+
 
         let token = TokenMgr.getIns().bind(openId);
         resData = { code, token, };
