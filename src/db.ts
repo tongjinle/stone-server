@@ -51,6 +51,7 @@ export default class Database {
 
     async open() {
         this.db = (await mongodb.MongoClient.connect(this.connectStr)).db('dota');
+        // console.log({db:!!this.db});
         this.userCollection = this.db.collection('user');
         this.checkRecordCollection = this.db.collection('checkRecord');
         this.itemCollection = this.db.collection('item');

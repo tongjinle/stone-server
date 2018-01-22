@@ -36,7 +36,7 @@ const config = {
     commentEndTime: 3 * HOUR,
 
     // *** 数据库
-    connectStr: 'mongodb://localhost:27017/dota',
+    connectStr: 'mongodb://sa:sa@118.31.11.29:27017/admin',
 
     // 微信
     // 是否mock openId
