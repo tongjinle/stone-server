@@ -40,7 +40,7 @@ const config = {
 
     // 微信
     // 是否mock openId
-    isMockOpenId:true,
+    isMockOpenId:false,
     // appId和appSecret
     wx:{
         appId:'',
