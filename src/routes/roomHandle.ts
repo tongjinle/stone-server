@@ -19,6 +19,7 @@ enum eApplyRoomCode {
     notEnoughCoin,
     notExists,
     expires,
+    enoughMate,
 };
 
 enum eCommentRoomCode {
@@ -66,6 +67,7 @@ export default function handle(app: express.Express) {
         let { user, } = await db.queryUser({ openId, });
         let dotaId = user.dotaId;
         let { roomId, } = await db.insertRoom({ openId, dotaId, count, coin, beginTime, endTime, commentDuration, });
+        await db.updateUserCurrRoomId({ openId, roomId, });
         resData = { code, id: roomId, };
         res.json(resData);
     });
@@ -139,9 +141,17 @@ export default function handle(app: express.Express) {
 
         }
 
+        // 黑店人数到达最大上限
+        {
+            if (room.mateList.length >= room.count) {
+                res.json({ code: eApplyRoomCode.enoughMate, });
+                return;
+            }
+        }
+
         let dotaId: string = user.dotaId;
         await db.applyRoom({ roomId, openId, dotaId, });
-        await db.updateUserCurrRoomId({openId,roomId,});
+        await db.updateUserCurrRoomId({ openId, roomId, });
         resData = { code, };
         res.json(resData);
     });
