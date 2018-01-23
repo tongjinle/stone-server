@@ -141,6 +141,7 @@ export default function handle(app: express.Express) {
 
         let dotaId: string = user.dotaId;
         await db.applyRoom({ roomId, openId, dotaId, });
+        await db.updateUserCurrRoomId({openId,roomId,});
         resData = { code, };
         res.json(resData);
     });

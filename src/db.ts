@@ -91,6 +91,20 @@ export default class Database {
         return { flag, };
     }
 
+    // 设置一个用户的当前房间id
+    async updateUserCurrRoomId({ openId, roomId, }: { openId: string, roomId: string, }): Promise<{ flag: boolean, }> {
+        let flag: boolean = true;
+        await this.userCollection.updateOne({ openId, }, { $set: { currRoomId: roomId, } });
+        return { flag, };
+    }
+
+    // 删除一个用户的当前房间id
+    async removeUserCurrRoomId({ openId, }: { openId: string, }): Promise<{ flag: boolean, }> {
+        let flag: boolean = true;
+        await this.userCollection.updateOne({ openId, }, { $unset: { currRoomId: 1, } });
+        return { flag, };
+    }
+
     // 删除一个用户
     async removeUser({ openId, }: { openId: string, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
