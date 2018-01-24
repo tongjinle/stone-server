@@ -43,8 +43,8 @@ const config = {
     isMockOpenId:false,
     // appId和appSecret
     wx:{
-        appId:'',
-        appSecret:'',
+        appId:'wx78e8934b88e1cd61',
+        appSecret:'3da2d219dfd019df08433c2cd60ee2de',
     },
 
 };
