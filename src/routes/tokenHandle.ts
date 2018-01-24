@@ -11,6 +11,7 @@ async function getUserInfo(code: string, ): Promise<string> {
     let url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code"`;
     try {
         let { data, } = await axios.get(url, );
+        console.log('getWxOpenId:',JSON.stringify(data));
         if (data.errcode) {
             return undefined;
         } else {
