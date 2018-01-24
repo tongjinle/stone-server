@@ -15,7 +15,7 @@ async function getUserInfo(code: string, ): Promise<string> {
         if (data.errcode) {
             return undefined;
         } else {
-            return data.openId;
+            return data.openid;
         }
     } catch (e) {
         return undefined;
