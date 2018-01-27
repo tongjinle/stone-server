@@ -73,6 +73,7 @@ export interface IScore {
 
 // 黑店房间
 export interface IRoom {
+    _id?:string,
     // *** 黑店加入配置 ***
     // 新人位置数量
     count: number,

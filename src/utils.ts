@@ -52,8 +52,20 @@ let checkRoomExpires = async (roomId: string): Promise<{ flag: boolean, }> => {
     return { flag, };
 };
 
+// 定时检测黑店是否过期
+// 检测排名前n名的黑店
+let clearRoomLoop = async (): Promise<void> => {
+    let db = await Database.getIns();
+    let { count, interval } = config.clearRoom;
+    setInterval(() => {
+        let deadline = Date.now();
+        db.clearRoomList({ count, deadline, });
+    }, interval);
+};
+
 let utils = {
     checkRoomExpires,
+    clearRoomLoop,
 };
 
 

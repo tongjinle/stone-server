@@ -302,6 +302,24 @@ export default class Database {
 
     }
 
+    // 查询没有mark的黑店
+    async clearRoomList({ count, deadline, }: { count: number, deadline: number, }): Promise<void> {
+        let list = await this.roomCollection.find({ marked: undefined, }).sort({ beginTime: 1 }).limit(count).toArray();
+        list.forEach(ro => {
+            if (ro.endTime + config.commentEndTime < deadline) {
+                this.roomCollection.updateOne({ _id: new mongodb.ObjectId(ro._id) }, { $set: { marked: 1, } });
+
+                let openIdList = [ro.owner, ...ro.mateList.map(ma => ma.openId),];
+                openIdList.forEach(async (openId) => {
+                    let { user, } = await this.queryUser({ openId, });
+                    if (user && user.currRoomId == ro._id) {
+                        this.removeUserCurrRoomId({ openId, });
+                    }
+                });
+            }
+        });
+    }
+
 
     // *** dev ***
     async removeUserAll() {

@@ -32,6 +32,7 @@ import loger from './logIns';
 import config from './config';
 
 import httpRouteHandle from './routes/httpRoute';
+import utils from './utils';
 // import socketRouteHandle from './socketRoute/socketRoute';
 
 
@@ -86,6 +87,9 @@ class Main {
 
         // 路由
         httpRouteHandle(app);
+
+        // 定期清理过期黑店
+        utils.clearRoomLoop();
 
         // 启动
         let { port } = config;

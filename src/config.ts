@@ -47,6 +47,15 @@ const config = {
         appSecret: '3da2d219dfd019df08433c2cd60ee2de',
     },
 
+    // 定期清理过期黑店
+    clearRoom: {
+        // 清理个数
+        // 防止一次清理太多,造成性能问题
+        count: 20,
+        // 定期清理的间隔时间
+        interval: 10 * MIN,
+    },
+
 };
 
 export default config;
