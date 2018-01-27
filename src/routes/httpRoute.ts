@@ -30,17 +30,23 @@ export default function handler(app: express.Express) {
     // 检测/auth/路由下的访问权限
     // 检查有没有合法的token
     // 错误码 100
-    app.use((req, res, next) => {
+    app.use(async (req, res, next) => {
         if (/\/auth\//.test(req.path)) {
             loger.debug('check auth');
             let token: string = req.headers['token'] as string;
             if (!TokenMgr.getIns().check(token)) {
-                res.json({
-                    code: 100,
-                });
+                res.json({ code: 100, });
                 return;
             }
-            req.headers['openId'] = TokenMgr.getIns().get(token);
+
+
+            let openId: string = req.headers['openId'] = TokenMgr.getIns().get(token);
+            let db = await Database.getIns();
+            let { user, } = await db.queryUser({ openId, });
+            if (!user) {
+                res.json({ code: 100, });
+                return;
+            }
         }
 
 
@@ -64,9 +70,9 @@ export default function handler(app: express.Express) {
             // 存在当前黑店
             if (user.currRoomId != undefined) {
                 let { room } = await db.queryRoom({ roomId: user.currRoomId, });
-                if(!!room){
-                    let code:number = 200;
-                    res.json({code,    });
+                if (!!room) {
+                    let code: number = 200;
+                    res.json({ code, });
                     return;
                 }
             }
@@ -97,6 +103,6 @@ export default function handler(app: express.Express) {
     // 黑店
     roomHandle(app);
 
-   
+
 
 }
