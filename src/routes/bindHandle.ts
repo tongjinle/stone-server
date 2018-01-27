@@ -3,6 +3,7 @@ import * as Protocol from '../protocol';
 import config from '../config';
 import Database from '../db';
 import * as rege from '../rege';
+import utils from '../utils'; 
 
 enum eBindCode {
     // 数据格式错误
@@ -73,7 +74,17 @@ export default function handle(app: express.Express) {
             res.json(resData);
             return;
         }
-        resData = { code, dotaId: user.dotaId, coin: user.coin, bindTime: user.bindTime,currRoomId:user.currRoomId, };
+
+        let currRoomId:string = user.currRoomId;
+        if (currRoomId) {
+            let {flag:isExpires,} = await utils.checkRoomExpires(user.currRoomId);
+            if(isExpires){
+                await db.removeUserCurrRoomId({openId,});
+                currRoomId = undefined;
+            }
+        }
+
+        resData = { code, dotaId: user.dotaId, coin: user.coin, bindTime: user.bindTime, currRoomId, };
         res.json(resData);
 
     });
