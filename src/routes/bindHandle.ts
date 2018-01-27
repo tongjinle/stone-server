@@ -77,9 +77,7 @@ export default function handle(app: express.Express) {
 
         let currRoomId:string = user.currRoomId;
         if (currRoomId) {
-            let ret = await utils.checkRoomExpires(user.currRoomId);
-            console.log('ret:',ret);
-            let  {flag:isExpires,} = ret;
+            let {flag:isExpires,} = await utils.checkRoomExpires(user.currRoomId);
             if(isExpires){
                 await db.removeUserCurrRoomId({openId,});
                 currRoomId = undefined;
