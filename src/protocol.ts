@@ -66,6 +66,8 @@ export interface IResUserInfo extends IResBase {
     coin?: number,
     // 第一次绑定时间戳,精确到毫秒
     bindTime?: number,
+    // 当前黑店id
+    currRoomId?: string,
 };
 
 

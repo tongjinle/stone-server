@@ -73,7 +73,7 @@ export default function handle(app: express.Express) {
             res.json(resData);
             return;
         }
-        resData = { code, dotaId: user.dotaId, coin: user.coin, bindTime: user.bindTime, };
+        resData = { code, dotaId: user.dotaId, coin: user.coin, bindTime: user.bindTime,currRoomId:user.currRoomId, };
         res.json(resData);
 
     });

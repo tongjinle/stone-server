@@ -32,7 +32,7 @@ const config = {
     roomEndTime: 5 * MIN,
 
     // 可以评论黑店时间,1小时到3小时
-    commentBeginTime: HOUR,
+    commentBeginTime: .5 * HOUR,
     commentEndTime: 3 * HOUR,
 
     // *** 数据库
@@ -40,11 +40,11 @@ const config = {
 
     // 微信
     // 是否mock openId
-    isMockOpenId:false,
+    isMockOpenId: false,
     // appId和appSecret
-    wx:{
-        appId:'wx78e8934b88e1cd61',
-        appSecret:'3da2d219dfd019df08433c2cd60ee2de',
+    wx: {
+        appId: 'wx78e8934b88e1cd61',
+        appSecret: '3da2d219dfd019df08433c2cd60ee2de',
     },
 
 };
