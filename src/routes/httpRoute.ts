@@ -27,19 +27,26 @@ import devHandle from './devHandle';
 const { rege } = config;
 
 export default function handler(app: express.Express) {
-    // 检测/auth/路由下的访问权限
-    // 检查有没有合法的token
-    // 错误码 100
+    // bind需要token
     app.use(async (req, res, next) => {
-        if (/\/auth\//.test(req.path)) {
-            loger.debug('check auth');
+        if (/\/bind$|\/auth\//.test(req.path)) {
             let token: string = req.headers['token'] as string;
             if (!TokenMgr.getIns().check(token)) {
                 res.json({ code: 100, });
                 return;
             }
 
+        }
+        next();
+    });
 
+
+    // 检测/auth/路由下的访问权限
+    // 检查有没有合法的token
+    // 错误码 100
+    app.use(async (req, res, next) => {
+        if (/\/auth\//.test(req.path)) {
+            let token: string = req.headers['token'] as string;
             let openId: string = req.headers['openId'] = TokenMgr.getIns().get(token);
             let db = await Database.getIns();
             let { user, } = await db.queryUser({ openId, });
