@@ -313,7 +313,13 @@ export default class Database {
                 openIdList.forEach(async (openId) => {
                     let { user, } = await this.queryUser({ openId, });
                     if (user && user.currRoomId == ro._id) {
+                        // 清理掉用户的当前黑店
                         this.removeUserCurrRoomId({ openId, });
+
+                        // 自动评价,缺省评价为1(好评)
+                        if (!ro.commentList.some(co => co.openId == openId)) {
+                            await this.commentRoom({ roomId: ro._id, openId, comment: 1, });
+                        }
                     }
                 });
             }
