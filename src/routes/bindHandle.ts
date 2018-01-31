@@ -3,7 +3,7 @@ import * as Protocol from '../protocol';
 import config from '../config';
 import Database from '../db';
 import * as rege from '../rege';
-import utils from '../utils'; 
+import utils from '../utils';
 
 enum eBindCode {
     // 数据格式错误
@@ -39,16 +39,22 @@ export default function handle(app: express.Express) {
             return;
         }
 
-        //插入数据库
+        // 如果是2次绑定,则修改dotaId
+        // 同时修改当前黑店的dotaId
         let db = await Database.getIns();
         let { user, } = await db.queryUser({ openId, });
         if (!!user) {
-            code = eBindCode.openIdExist;
+            await db.updateUser({ openId, dotaId, });
+            // 如果有当前黑店
+            if (user.currRoomId) {
+                await db.updateRoomUser({ roomId: user.currRoomId, openId, dotaId });
+            }
             resData = { code, };
             res.json(resData);
             return;
         }
 
+        //插入数据库
         let bindTime: number = Date.now();
         await db.insertUser({ openId, dotaId, reward, bindTime, });
         resData = { code, reward, };
@@ -75,11 +81,11 @@ export default function handle(app: express.Express) {
             return;
         }
 
-        let currRoomId:string = user.currRoomId;
+        let currRoomId: string = user.currRoomId;
         if (currRoomId) {
-            let {flag:isExpires,} = await utils.checkRoomExpires(user.currRoomId);
-            if(isExpires){
-                await db.removeUserCurrRoomId({openId,});
+            let { flag: isExpires, } = await utils.checkRoomExpires(user.currRoomId);
+            if (isExpires) {
+                await db.removeUserCurrRoomId({ openId, });
                 currRoomId = undefined;
             }
         }

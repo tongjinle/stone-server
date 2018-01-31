@@ -302,6 +302,19 @@ export default class Database {
 
     }
 
+    async updateRoomUser({ roomId, openId, dotaId, }: { roomId: string, openId: string, dotaId: string, }): Promise<{ flag: boolean, }> {
+        let flag: boolean = true;
+        let { room, } = await this.queryRoom({ roomId, });
+        if (!!room) {
+            if (room.owner == openId) {
+                await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $set: { ownerDotaId: dotaId, }, });
+            } else if (room.mateList.some(n => n.openId == openId)) {
+                await this.roomCollection.updateOne({ $and: { _id: new mongodb.ObjectId(roomId), mateList.openId: openId, } }, { $set: { dotaId, }, });
+            }
+        }
+        return { flag, };
+    }
+
     // 查询没有mark的黑店
     async clearRoomList({ count, deadline, }: { count: number, deadline: number, }): Promise<void> {
         let list = await this.roomCollection.find({ marked: undefined, }).sort({ beginTime: 1 }).limit(count).toArray();
