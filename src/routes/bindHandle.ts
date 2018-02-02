@@ -21,21 +21,23 @@ enum eQueryUserInfoCode {
 
 
 export default function handle(app: express.Express) {
-    app.post('/auth/bind', async (req, res) => {
+    app.post('/bind', async (req, res) => {
         let resData: Protocol.IResBind;
         let { dotaId } = req.body as Protocol.IReqBind;
         let openId: string = req.headers['openId'] as string;
         let code: number = undefined;
         let reward: number = config.bindReward;
+        console.log({openId,});
 
         // 正则
         if (openId === undefined ||
             dotaId === undefined ||
             !rege.openId.test(openId) ||
-            !rege.dotaId.test(dotaId.toString())) {
+            !rege.dotaId.test(dotaId)) {
             code = eBindCode.invalidFormat;
             resData = { code, };
             res.json(resData);
+            console.log(openId,dotaId,);
             return;
         }
 

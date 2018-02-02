@@ -31,9 +31,9 @@ export default function handle(app: express.Express) {
         let code: number = undefined;
         let cliCode = (req.query as Protocol.IReqToken).code;
 
-        // mock openId
-        // 其实应该从微信服务器拿到的
-        let openId = config.isMockOpenId ? 'mockOpenId' : await getUserInfo(cliCode);
+
+        let openId = config.isMockOpenId ? config.mockOpenId : await getUserInfo(cliCode);
+        console.log(openId,config.isMockOpenId,config.mockOpenId);
 
         // 获取openId失败
         if (!openId) {

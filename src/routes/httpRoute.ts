@@ -31,6 +31,9 @@ export default function handler(app: express.Express) {
     app.use(async (req, res, next) => {
         if (/\/bind$|\/auth\//.test(req.path)) {
             let token: string = req.headers['token'] as string;
+            let openId: string = req.headers['openId'] = TokenMgr.getIns().get(token);
+            
+            console.log({token});
             if (!TokenMgr.getIns().check(token)) {
                 res.json({ code: 100, });
                 return;

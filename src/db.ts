@@ -26,6 +26,10 @@ import * as mongodb from 'mongodb';
 import config from './config';
 import * as Schema from './schema';
 
+enum eStatus {
+    open, close,
+};
+
 export default class Database {
     private connectStr: string;
     private db: mongodb.Db;
@@ -34,33 +38,43 @@ export default class Database {
     private itemCollection: mongodb.Collection<Schema.IItem>;
     private shopRecordCollection: mongodb.Collection<Schema.IShopRecord>;
     private roomCollection: mongodb.Collection<Schema.IRoom>;
-
+    private status: eStatus;
     // 返回一个连接实例
     private static ins: Database;
     static async getIns(): Promise<Database> {
         if (!Database.ins) {
-            let ins = Database.ins = new Database();
-            await ins.open();
+            Database.ins = new Database();
         }
+
+        let ins: Database = Database.ins;
+        if (ins.status == eStatus.close) {
+            await ins.open();
+
+        }
+
         return Database.ins;
     }
 
     private constructor() {
         this.connectStr = config.connectStr;
+        this.status = eStatus.close;
     }
 
     async open() {
-        this.db = (await mongodb.MongoClient.connect(this.connectStr)).db('dota');
+        this.db = (await mongodb.MongoClient.connect(this.connectStr));
+        this.status = eStatus.open;
         // console.log({db:!!this.db});
-        this.userCollection = this.db.collection('user');
-        this.checkRecordCollection = this.db.collection('checkRecord');
-        this.itemCollection = this.db.collection('item');
-        this.shopRecordCollection = this.db.collection('shopRecord');
-        this.roomCollection = this.db.collection('room');
+        let dotaDb = this.db.db('dota');
+        this.userCollection = dotaDb.collection('user');
+        this.checkRecordCollection = dotaDb.collection('checkRecord');
+        this.itemCollection = dotaDb.collection('item');
+        this.shopRecordCollection = dotaDb.collection('shopRecord');
+        this.roomCollection = dotaDb.collection('room');
     }
 
     async close() {
         await this.db.close();
+        this.status = eStatus.close;
     }
 
 
@@ -309,7 +323,7 @@ export default class Database {
             if (room.owner == openId) {
                 await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $set: { ownerDotaId: dotaId, }, });
             } else if (room.mateList.some(n => n.openId == openId)) {
-                await this.roomCollection.updateOne({ $and: { _id: new mongodb.ObjectId(roomId), mateList.openId: openId, } }, { $set: { dotaId, }, });
+                await this.roomCollection.updateOne({ $and: { _id: new mongodb.ObjectId(roomId), "mateList.openId": openId, } }, { $set: { dotaId, }, });
             }
         }
         return { flag, };

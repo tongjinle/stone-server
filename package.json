@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node ./dist/test/index.js -t"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +28,13 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/glob": "^5.0.35",
+    "@types/jasmine": "^2.8.6",
     "@types/log4js": "0.0.32",
+    "chalk": "^2.3.0",
+    "glob": "^7.1.2",
+    "jasmine": "^2.9.0",
     "log4js": "^1.1.0"
   }
 }

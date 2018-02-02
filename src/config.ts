@@ -2,7 +2,7 @@ const MIN = 60 * 1000;
 const HOUR = 60 * MIN;
 const DAY = 24 * HOUR;
 
-const config = {
+let config = {
     // http 端口
     port: 3000,
 
@@ -38,6 +38,9 @@ const config = {
     // *** 数据库
     connectStr: 'mongodb://sa:sa@118.31.11.29:27017/admin',
 
+    // *** api 
+    apiPrefix:'http://api.puman.xyz:3000/',
+
     // 微信
     // 是否mock openId
     isMockOpenId: false,
@@ -46,6 +49,9 @@ const config = {
         appId: 'wx78e8934b88e1cd61',
         appSecret: '3da2d219dfd019df08433c2cd60ee2de',
     },
+
+    // mockOpenId
+    mockOpenId:'mockOpenId',
 
     // 定期清理过期黑店
     clearRoom: {
@@ -58,4 +64,20 @@ const config = {
 
 };
 
+let isTest:boolean = process.argv[2] == '-t';
+
+if(isTest){
+    config = Object.assign(config,{
+        isMockOpenId:true,
+        apiPrefix:'http://localhost:3000/',
+        connectStr: 'mongodb://sa:sa@localhost:27017/admin',
+
+    });
+}
+
+
 export default config;
+
+
+
+
