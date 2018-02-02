@@ -25,7 +25,7 @@ async function main() {
         let file = files[i];
         let fn = require(file).default as ITestFunc;
         try {
-
+            console.log(chalk.whiteBright(`## ${file.match(/\/(.*?)[sS]pec.js$/)[1]} ##`));
             let retList = await fn({ db, axi, });
             retList.forEach(ret => {
                 if (ret.expect === ret.calc) {

@@ -370,4 +370,9 @@ export default class Database {
         return;
     }
 
+    async removeRoomAll(){
+        await this.roomCollection.remove({});
+        return ;
+    }
+
 }

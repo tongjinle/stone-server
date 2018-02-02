@@ -12,10 +12,6 @@ export default function handle(app: express.Express) {
         let end = begin + 24 * 60 * 60 * 1000;
 
         let db = await Database.getIns();
-        let { user, } = await db.queryUser({ openId, });
-        if (!user) {
-            return false;
-        }
 
         let { list, } = await db.getCheckRecord({ openId, begin, end, });
         return !!list.length;
@@ -30,7 +26,7 @@ export default function handle(app: express.Express) {
         let flag: boolean = true;
         let code: number = undefined;
 
-        code = await hasCheck(openId) ? undefined : 0;
+        code = await hasCheck(openId) ? 0 : undefined;
 
         resData = { flag, code, };
         res.json(resData);
