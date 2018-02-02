@@ -27,7 +27,6 @@ export default function handle(app: express.Express) {
         let openId: string = req.headers['openId'] as string;
         let code: number = undefined;
         let reward: number = config.bindReward;
-        console.log({openId,});
 
         // 正则
         if (openId === undefined ||
@@ -37,7 +36,6 @@ export default function handle(app: express.Express) {
             code = eBindCode.invalidFormat;
             resData = { code, };
             res.json(resData);
-            console.log(openId,dotaId,);
             return;
         }
 
