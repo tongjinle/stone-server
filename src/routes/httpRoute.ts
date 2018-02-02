@@ -35,7 +35,7 @@ export default function handler(app: express.Express) {
             
             console.log({token});
             if (!TokenMgr.getIns().check(token)) {
-                res.json({ code: 100, });
+                res.json({ code: config.commonErrCode.tokenInvalid, });
                 return;
             }
 
@@ -54,7 +54,7 @@ export default function handler(app: express.Express) {
             let db = await Database.getIns();
             let { user, } = await db.queryUser({ openId, });
             if (!user) {
-                res.json({ code: 100, });
+                res.json({ code: config.commonErrCode.userInvalid, });
                 return;
             }
         }
@@ -81,7 +81,7 @@ export default function handler(app: express.Express) {
             if (user.currRoomId != undefined) {
                 let { room } = await db.queryRoom({ roomId: user.currRoomId, });
                 if (!!room) {
-                    let code: number = 200;
+                    let code: number = config.commonErrCode.roomExists;
                     res.json({ code, });
                     return;
                 }

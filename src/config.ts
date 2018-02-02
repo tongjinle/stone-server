@@ -39,7 +39,7 @@ let config = {
     connectStr: 'mongodb://sa:sa@118.31.11.29:27017/admin',
 
     // *** api 
-    apiPrefix:'http://api.puman.xyz:3000/',
+    apiPrefix: 'http://api.puman.xyz:3000/',
 
     // 微信
     // 是否mock openId
@@ -51,7 +51,7 @@ let config = {
     },
 
     // mockOpenId
-    mockOpenId:'mockOpenId',
+    mockOpenId: 'mockOpenId',
 
     // 定期清理过期黑店
     clearRoom: {
@@ -62,14 +62,21 @@ let config = {
         interval: 10 * MIN,
     },
 
+
+    commonErrCode: {
+        tokenInvalid: 50,
+        userInvalid: 100,
+        roomExists: 200,
+        roomInvalid: 300,
+    },
 };
 
-let isTest:boolean = process.argv[2] == '-t';
+let isTest: boolean = process.argv[2] == '-t';
 
-if(isTest){
-    config = Object.assign(config,{
-        isMockOpenId:true,
-        apiPrefix:'http://localhost:3000/',
+if (isTest) {
+    config = Object.assign(config, {
+        isMockOpenId: true,
+        apiPrefix: 'http://localhost:3000/',
         connectStr: 'mongodb://sa:sa@localhost:27017/admin',
 
     });
