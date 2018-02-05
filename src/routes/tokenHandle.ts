@@ -3,6 +3,7 @@ import * as Protocol from '../protocol';
 import config from '../config';
 import TokenMgr from '../tokenMgr';
 import axios from 'axios';
+import * as Chance from 'chance';
 
 // 通过code获取微信用户信息
 async function getUserInfo(code: string, ): Promise<string> {
@@ -11,7 +12,7 @@ async function getUserInfo(code: string, ): Promise<string> {
     let url = `https://api.weixin.qq.com/sns/jscode2session?appid=${appId}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code"`;
     try {
         let { data, } = await axios.get(url, );
-        console.log('getWxOpenId:',JSON.stringify(data));
+        console.log('getWxOpenId:', JSON.stringify(data));
         if (data.errcode) {
             return undefined;
         } else {
@@ -31,9 +32,10 @@ export default function handle(app: express.Express) {
         let code: number = undefined;
         let cliCode = (req.query as Protocol.IReqToken).code;
 
+        let chance = new Chance();
 
-        let openId = config.isMockOpenId ? config.mockOpenId : await getUserInfo(cliCode);
-        console.log(openId,config.isMockOpenId,config.mockOpenId);
+        let openId = config.isMockOpenId ? chance.string({ length: 12 }) : await getUserInfo(cliCode);
+        console.log(openId, config.isMockOpenId, config.mockOpenId);
 
         // 获取openId失败
         if (!openId) {

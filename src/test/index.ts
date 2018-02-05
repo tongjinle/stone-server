@@ -6,6 +6,7 @@ import config from '../config';
 import chalk from 'chalk';
 import { ITestFunc, IResult, } from './ItestFunc';
 import Database from '../db';
+import * as utils from './utils';
 
 
 let dir = path.resolve(__dirname, './spec');
@@ -17,9 +18,7 @@ console.log('files:', files);
 let { apiPrefix, } = config;
 async function main() {
     let db = await Database.getIns();
-    let axi = getAxios();
-    let token = await getToken('testToken');
-    axi.defaults.headers.token = token;
+    let axi = await utils.getAxios('default');
 
     for (var i = 0; i < files.length; i++) {
         let file = files[i];
@@ -42,16 +41,5 @@ async function main() {
     await db.close();
 
 }
-
-function getAxios(): axiosNs.AxiosInstance {
-    return axiosNs.default.create();
-}
-
-async function getToken(code: string) {
-    let axi = getAxios();
-    let url = apiPrefix + 'getToken' + '?' + qs.stringify({ code, });
-    let { data } = await axi.get(url) as { data: { code?: number, token?: string, } };
-    return data.token;
-};
 
 main();
