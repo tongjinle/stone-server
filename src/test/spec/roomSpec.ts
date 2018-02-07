@@ -1,12 +1,32 @@
 import Database from '../../db';
-import axios from 'axios';
+import * as axiosNs from 'axios';
 import config from '../../config';
 import * as qs from 'querystring';
 import * as Protocol from '../../protocol';
 import { ITestFunc, IResult } from '../ItestFunc';
+import * as utils from '../utils';
 
 
 let { apiPrefix, } = config;
+
+async function createRoom(axi: axiosNs.AxiosInstance, count: number, coin: number, ): Promise<Protocol.IResCreateRoom> {
+    let { data, } = await axi.post(apiPrefix + 'auth/room/create', { count, coin, } as Protocol.IReqCreateRoom) as { data: Protocol.IResCreateRoom };
+    return data;
+};
+
+async function applyRoom(axi: axiosNs.AxiosInstance, roomId: string, ): Promise<Protocol.IResApplyRoom> {
+    let { data, } = await axi.post(apiPrefix + 'auth/room/apply', { roomId, }) as { data: Protocol.IResApplyRoom, };
+    return data;
+}
+
+async function updateRoomTime(db: Database, roomId: string, createTime: number, ): Promise<void> {
+    await db.updateRoomTime({ roomId, createTime, });
+}
+
+async function logRoom(db: Database, roomId: string): Promise<void> {
+    let { room, } = await db.queryRoom({ roomId, });
+    console.log(JSON.stringify(room, undefined, 4));
+}
 
 let fn: ITestFunc = async function({ db, axi, }) {
     let ret: IResult[] = [];
@@ -19,7 +39,22 @@ let fn: ITestFunc = async function({ db, axi, }) {
         await db.removeUserAll();
         await db.removeRoomAll();
 
-        
+        let count = 3;
+        let coin = 10;
+        let dotaId = '1328192478';
+
+        await utils.createUser(axi, dotaId);
+
+        {
+            let data = await createRoom(axi, count, coin);
+            ret.push({ title: '建立黑店', expect: undefined, calc: data.code, });
+        }
+
+
+        {
+            let data = await createRoom(axi, count, coin);
+            ret.push({ title: '再次建立黑店', expect: 200, calc: data.code, });
+        }
     }
 
     // 有黑店的状态下,不能参加别的黑店
@@ -33,19 +68,112 @@ let fn: ITestFunc = async function({ db, axi, }) {
     // !失败,自己已经有黑店了
     // dino参加黑店rb
     // !失败,自己已经有黑店了
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
 
+        let puman = await utils.getAxios('puman');
+        let dino = await utils.getAxios('dino');
+        let tong = await utils.getAxios('tong');
 
+        await utils.createUser(puman, '123456');
+        await utils.createUser(dino, '1234567');
+        await utils.createUser(tong, '12345678');
+
+        let { id: roomId, } = await createRoom(puman, 10, 1);
+        {
+            let data = await applyRoom(puman, roomId);
+            ret.push({ title: 'puman参加自己创建的黑店-失败', expect: 200, calc: data.code });
+        }
+
+        {
+            let data = await applyRoom(dino, roomId);
+            ret.push({ title: 'dino参加puman的黑店-成功', expect: undefined, calc: data.code, });
+        }
+
+        let { id: otherRoomId, } = await createRoom(tong, 10, 1);
+        {
+            let data = await applyRoom(tong, roomId);
+            ret.push({ title: 'tong建立了黑店,又参加puman的黑店-失败', expect: 200, calc: data.code });
+        }
+
+        {
+            let data = await applyRoom(tong, otherRoomId);
+            ret.push({ title: 'dino已经参加了puman的黑店,又参加tong的黑店-失败', expect: 200, calc: data.code });
+        }
+    }
+
+    // 黑店coin不足,不能参加
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        let hugeCoin = 10 * 1000;
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 3, hugeCoin);
+
+        let puman = await utils.getAxios('puman');
+        await utils.createUser(puman, '123456');
+
+        let data = await applyRoom(puman, roomId);
+        ret.push({ title: '黑店coin不足,不能参加', expect: 0, calc: data.code });
+
+    }
 
     // 黑店超过时间了,不能参加
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 3, 10);
+
+        let createTime: number = new Date(1900, 1, 1).getTime();
+        await updateRoomTime(db, roomId, createTime);
+
+
+        let puman = await utils.getAxios('puman');
+        await utils.createUser(puman, '123456');
+
+        let data = await applyRoom(puman, roomId);
+        ret.push({ title: '黑店超过时间了,不能参加', expect: 2, calc: data.code, });
+
+        await logRoom(db, roomId);
+
+    }
 
     // 黑店超过最大人员,不能参加
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 2, 10);
+
+        let puman = await utils.getAxios('puman');
+        await utils.createUser(puman, '123456');
+
+        let puman1 = await utils.getAxios('puman1');
+        await utils.createUser(puman1, '1234567');
+
+        let puman2 = await utils.getAxios('puman2');
+        await utils.createUser(puman2, '12345678');
+
+        await applyRoom(puman, roomId);
+        await applyRoom(puman1, roomId);
+        let data = await applyRoom(puman2, roomId);
+        ret.push({ title: '黑店超过最大人员,不能参加', expect: 3, calc: data.code });
+
+    }
+
+    // 正常评价
 
     // 不是黑店人员,不能评价
 
     // 黑店超过评价时间了,不能评价,会自动评价
 
     // 黑店的自动解除状态
- 
+
 
     return ret;
 }

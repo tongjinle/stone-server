@@ -135,6 +135,7 @@ export default function handle(app: express.Express) {
         {
             let now = Date.now();
             if (room.endTime < now) {
+                console.log('黑店已经超过了申请时间', room.endTime, now);
                 res.json({ code: eApplyRoomCode.expires, msg: '黑店已经超过了申请时间', });
                 return;
             }

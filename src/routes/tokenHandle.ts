@@ -26,15 +26,15 @@ async function getUserInfo(code: string, ): Promise<string> {
     }
 };
 
+let chance = new Chance();
 export default function handle(app: express.Express) {
     app.get('/getToken', async (req, res) => {
         let resData: Protocol.IResToken;
         let code: number = undefined;
         let cliCode = (req.query as Protocol.IReqToken).code;
 
-        let chance = new Chance();
 
-        let openId = config.isMockOpenId ? chance.string({ length: 12 }) : await getUserInfo(cliCode);
+        let openId = config.isMockOpenId ? cliCode + chance.string({ length: 8 }) : await getUserInfo(cliCode);
         console.log(openId, config.isMockOpenId, config.mockOpenId);
 
         // 获取openId失败

@@ -353,6 +353,17 @@ export default class Database {
         });
     }
 
+    // 修改黑店的创建时间
+    // 同时修改申请时间的区间,评论时间的区间
+    // 仅仅为了测试而用
+    async updateRoomTime({ roomId, createTime, }: { roomId: string, createTime: number, }): Promise<void> {
+        let beginTime: number = createTime;
+        let endTime: number = config.roomEndTime + createTime;
+        let commentDuration = [endTime + config.commentBeginTime, endTime + config.commentEndTime,];
+        let update = { beginTime, endTime, commentDuration, };
+        await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $set: update }, );
+    }
+
 
     // *** dev ***
     async removeUserAll() {
@@ -370,9 +381,9 @@ export default class Database {
         return;
     }
 
-    async removeRoomAll(){
+    async removeRoomAll() {
         await this.roomCollection.remove({});
-        return ;
+        return;
     }
 
 }

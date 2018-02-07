@@ -66,6 +66,7 @@ export default class TokenMgr {
         // 创建token
         const duration = config.tokenExpires;
         let token: string = Math.floor((10e8 * Math.random())).toString(16).slice(0, 8);
+        console.log({openId,token,});
         this.dict[token] = { openId, expires: Date.now() + duration, };
         this.opDict[openId] = token;
         return token;
