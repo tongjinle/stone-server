@@ -18,13 +18,25 @@ export async function getAxios(code: string, ): Promise<axiosNs.AxiosInstance> {
 
 
 export async function getToken(axi: axiosNs.AxiosInstance, code: string): Promise<string> {
-
     let url = apiPrefix + 'getToken' + '?' + qs.stringify({ code, });
     let { data } = await axi.get(url) as { data: { code?: number, token?: string, } };
     return data.token;
 };
 
+export async function getOpenId(axi: axiosNs.AxiosInstance, ): Promise<string> {
+    let url = apiPrefix + 'getOpenId';
+    let { data } = await axi.get(url) as { data: { code?: number, openId?: string, } };
+    return data.openId;
+}
+
 export async function createUser(axi: axiosNs.AxiosInstance, dotaId: string): Promise<void> {
     await axi.post(apiPrefix + 'bind', { dotaId, } as Protocol.IReqBind) as { data: Protocol.IResBind };
 
+}
+
+
+export function delay(ms: number): Promise<void> {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
 }

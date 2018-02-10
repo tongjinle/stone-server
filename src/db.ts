@@ -284,7 +284,7 @@ export default class Database {
         let key: string = ({ '1': 'good', '0': 'normal', '-1': 'bad', } as { [index: string]: string })[comment.toString()] as string;
         let inc = { [key]: 1 };
 
-        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $push: { openId, comment, } });
+        let { upsertedCount, } = await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $push: { commentList: { openId, comment, }, } });
 
         flag = upsertedCount == 1;
         return { flag, };

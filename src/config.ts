@@ -1,4 +1,5 @@
-const MIN = 60 * 1000;
+const SEC = 1000;
+const MIN = 60 * SEC;
 const HOUR = 60 * MIN;
 const DAY = 24 * HOUR;
 
@@ -79,6 +80,13 @@ if (isTest) {
         apiPrefix: 'http://localhost:3000/',
         connectStr: 'mongodb://sa:sa@localhost:27017/admin',
 
+        clearRoom: {
+            // 清理个数
+            // 防止一次清理太多,造成性能问题
+            count: 10,
+            // 定期清理的间隔时间
+            interval: 5 * SEC,
+        },
     });
 }
 

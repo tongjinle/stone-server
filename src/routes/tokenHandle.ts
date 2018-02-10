@@ -51,4 +51,23 @@ export default function handle(app: express.Express) {
         res.json(resData);
 
     });
+
+    app.get('/getOpenId',async(req,res)=>{
+        let resData:Protocol.IResOpenId;
+        let openId:string = req.headers['openId'] as string;
+
+        resData = {openId,};
+        res.json(resData); 
+
+    });
 }
+
+
+
+
+
+
+
+
+
+

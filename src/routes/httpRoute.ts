@@ -29,7 +29,7 @@ const { rege } = config;
 export default function handler(app: express.Express) {
     // bind需要token
     app.use(async (req, res, next) => {
-        if (/\/bind$|\/auth\//.test(req.path)) {
+        if (/\/bind$|\/getOpenId|\/auth\//.test(req.path)) {
             let token: string = req.headers['token'] as string;
             let openId: string = req.headers['openId'] = TokenMgr.getIns().get(token);
             
@@ -68,7 +68,6 @@ export default function handler(app: express.Express) {
     app.use(async (req, res, next) => {
         let matchList = [
             /\/auth\/room\/create/,
-            /\/auth\/room\/comment/,
             /\/auth\/room\/apply/,
         ];
 

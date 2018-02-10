@@ -40,6 +40,14 @@ export interface IResToken extends IResBase {
     token?: string,
 }
 
+export interface IReqOpenId {
+}
+export interface IResOpenId extends IResBase {
+    openId?: string,
+}
+
+
+
 
 // 绑定id
 export interface IReqBind {

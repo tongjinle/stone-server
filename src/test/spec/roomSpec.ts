@@ -15,7 +15,12 @@ async function createRoom(axi: axiosNs.AxiosInstance, count: number, coin: numbe
 };
 
 async function applyRoom(axi: axiosNs.AxiosInstance, roomId: string, ): Promise<Protocol.IResApplyRoom> {
-    let { data, } = await axi.post(apiPrefix + 'auth/room/apply', { roomId, }) as { data: Protocol.IResApplyRoom, };
+    let { data, } = await axi.post(apiPrefix + 'auth/room/apply', { roomId, } as Protocol.IReqApplyRoom) as { data: Protocol.IResApplyRoom, };
+    return data;
+}
+
+async function commentRoom(axi: axiosNs.AxiosInstance, roomId: string, comment: number): Promise<Protocol.IResCommentRoom> {
+    let { data, } = await axi.post(apiPrefix + 'auth/room/comment', { roomId, comment, } as Protocol.IReqCommentRoom) as { data: Protocol.IResCommentRoom };
     return data;
 }
 
@@ -138,7 +143,7 @@ let fn: ITestFunc = async function({ db, axi, }) {
         let data = await applyRoom(puman, roomId);
         ret.push({ title: '黑店超过时间了,不能参加', expect: 2, calc: data.code, });
 
-        await logRoom(db, roomId);
+        // await logRoom(db, roomId);
 
     }
 
@@ -167,12 +172,81 @@ let fn: ITestFunc = async function({ db, axi, }) {
     }
 
     // 正常评价
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 2, 10);
+
+        let puman = await utils.getAxios('puman');
+        await utils.createUser(puman, '123456');
+
+        await applyRoom(puman, roomId);
+
+        let now = Date.now();
+        let createTime: number = now - config.roomEndTime - config.commentBeginTime - 5 * 60 * 1000;
+        await updateRoomTime(db, roomId, createTime);
+
+        let comment: number = 1;
+        let data = await commentRoom(puman, roomId, comment);
+        ret.push({ title: '正常评价', expect: undefined, calc: data.code });
+
+    }
 
     // 不是黑店人员,不能评价
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
 
-    // 黑店超过评价时间了,不能评价,会自动评价
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 2, 10);
 
-    // 黑店的自动解除状态
+        let puman = await utils.getAxios('puman');
+        await utils.createUser(puman, '123456');
+
+        let now = Date.now();
+        let createTime: number = now - config.roomEndTime - config.commentBeginTime - 5 * 60 * 1000;
+        await updateRoomTime(db, roomId, createTime);
+
+        let comment: number = 1;
+        let data = await commentRoom(puman, roomId, comment);
+        ret.push({ title: '不是黑店人员,不能评价', expect: 1, calc: data.code });
+    }
+
+    // 黑店超过评价时间了,不能评价
+    // 黑店超过评价时间了,会自动评价
+    // 黑店超过评价时间了,参与者的当前黑店的状态自动解除
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 2, 10);
+
+        let puman = await utils.getAxios('puman');
+        await utils.createUser(puman, '123456');
+
+        await applyRoom(puman, roomId);
+
+        let createTime: number = new Date(1900, 1, 1).getTime();
+        await updateRoomTime(db, roomId, createTime);
+
+        let comment: number = 1;
+        let data = await commentRoom(puman, roomId, comment);
+        ret.push({ title: '黑店超过评价时间了,不能评价', expect: 2, calc: data.code });
+
+        await utils.delay(2*config.clearRoom.interval);
+        let {room,} = await db.queryRoom({roomId,});
+        let openId = await utils.getOpenId(puman);
+        let flag:boolean = room.commentList.some(n=>n.openId == openId && n.comment == 1 );
+        ret.push({ title: '黑店超过评价时间了,会自动评价', expect: true, calc: flag });
+
+        let { user, } = await db.queryUser({ openId, });
+        ret.push({title:'黑店超过评价时间了,参与者的当前黑店的状态自动解除',expect:undefined,calc:user.currRoomId,});
+
+    }
+
 
 
     return ret;
