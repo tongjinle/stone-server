@@ -69,6 +69,7 @@ let config = {
         userInvalid: 100,
         roomExists: 200,
         roomInvalid: 300,
+        notAdmin:500,
     },
 };
 

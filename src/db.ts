@@ -99,9 +99,17 @@ export default class Database {
 
     // 修改一个用户的coin
     // coinDelta coin增量
-    async updateUserCoin({ openId, coinDelta, }: { openId: string, coinDelta: number, }): Promise<{ flag: boolean, }> {
+    async updateUserCoin({ openId, coinDelta, coinAbs }: { openId: string, coinDelta?: number, coinAbs?: number, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
-        await this.userCollection.updateOne({ openId, }, { $inc: { coin: coinDelta, } });
+        if (coinAbs !== undefined) {
+            let { modifiedCount } = await this.userCollection.updateOne({ openId, }, { $set: { coin: coinAbs, } });
+            flag = modifiedCount == 1;
+        } else if (coinDelta != undefined) {
+            let { modifiedCount } = await this.userCollection.updateOne({ openId, }, { $inc: { coin: coinDelta, } });
+            flag = modifiedCount == 1;
+        } else {
+            flag = false;
+        }
         return { flag, };
     }
 
@@ -174,14 +182,26 @@ export default class Database {
     // 删除一条dota2虚拟道具记录
     async removeItem({ name, }: { name: string, }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
-        await this.itemCollection.remove({ name, });
+        let { deletedCount, } = await this.itemCollection.deleteOne({ name, });
+        flag = deletedCount == 1;
         return { flag, };
     }
 
     // 修改一条dota2虚拟道具记录
-    async updateItem({ name, coin, }: { name: string, coin: number, }): Promise<{ flag: boolean, }> {
+    async updateItem({ name, coin, src, newName, }: { name: string, newName?: string, coin?: number, src?: string }): Promise<{ flag: boolean, }> {
         let flag: boolean = true;
-        await this.itemCollection.updateOne({ name, }, { $set: { coin, } });
+        let modi: any = {};
+        if (newName !== undefined) {
+            modi.name = newName;
+        }
+        if (coin != undefined) {
+            modi.coin = coin;
+        }
+        if (src != undefined) {
+            modi.src = src;
+        }
+        let { modifiedCount, } = await this.itemCollection.updateOne({ name, }, { $set: modi });
+        flag = modifiedCount == 1;
         return { flag, };
     }
 
@@ -208,14 +228,20 @@ export default class Database {
         if (priceInterval) {
             filter.coin = { $gte: priceInterval[0], $lte: priceInterval[1] };
         }
-        let query = await this.itemCollection.find(filter);
+        console.log({ filter });
+        let query = await this.itemCollection.find(filter, { _id: 0 });
         totalCount = await query.count();
-        list = await query.skip(pageSize * pageIndex).limit(pageSize).toArray();
+        list = await query.sort({ coin: 1, }).skip(pageSize * pageIndex).limit(pageSize).toArray();
         return { flag, list, totalCount };
     }
 
 
-
+    async queryShopRecord({ id }: { id: string, }): Promise<{ flag: boolean, shop?: Schema.IShopRecord }> {
+        let flag = true;
+        let shop = await this.shopRecordCollection.findOne({ _id: new mongodb.ObjectId(id), });
+        flag = !!shop;
+        return { flag, shop };
+    }
 
     // 新增订单
     // 兑换dota2虚拟道具

@@ -98,6 +98,37 @@ export interface IResCheck extends IResBase {
     reward?: number,
 };
 
+// 新增虚拟道具
+export interface IReqCreateItem {
+    name: string,
+    coin: number,
+    src: string,
+}
+
+export interface IResCreateItem extends IResBase {
+
+}
+
+// 修改虚拟道具
+export interface IReqUpdateItem {
+    name: string,
+    coin?: number,
+    src?: string,
+    newName?: string,
+}
+
+export interface IResUpdateItem extends IResBase {
+
+}
+
+// 下架虚拟道具
+export interface IReqRemoveItem {
+    name: string,
+}
+
+export interface IResRemoveItem extends IResBase {
+
+}
 
 // 使用虚拟币兑换游戏中的虚拟道具
 export interface IReqBuyItem {
@@ -108,6 +139,9 @@ export interface IResBuyItem extends IResBase {
     // 错误码
     // 0 金币不足
     // 1 虚拟道具出售一空或者虚拟道具不存在,即错误的道具编号
+
+    // 成功购买之后的交易id
+    shopId?: string,
 };
 
 

@@ -89,6 +89,32 @@ export default function handler(app: express.Express) {
         next();
     });
 
+    // 错误码500
+    app.use(async(req,res,next)=>{
+        let matchList = [
+            /\/admin\//,
+        ];
+
+        if (matchList.some(n => n.test(req.path))) {
+            let db = await Database.getIns();
+
+            let openId: string = req.headers['openId'] as string;
+            let { user } = await db.queryUser({ openId, });
+            // 存在当前黑店
+            if (user.currRoomId != undefined) {
+                let { room } = await db.queryRoom({ roomId: user.currRoomId, });
+                if (!!room) {
+                    let code: number = config.commonErrCode.notAdmin;
+                    res.json({ code, });
+                    return;
+                }
+            }
+        }
+        next();
+    });
+
+
+
 
 
     // 开发

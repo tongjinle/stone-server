@@ -14,6 +14,8 @@ let dir = path.resolve(__dirname, './spec');
 let files = glob.sync(dir + '/**/*[sS]pec.js');
 console.log('files:', files);
 
+files = filter('itemSpec');
+
 
 let { apiPrefix, } = config;
 async function main() {
@@ -27,7 +29,18 @@ async function main() {
             console.log(chalk.whiteBright(`## ${file.match(/\/(.*?)[sS]pec.js$/)[1]} ##`));
             let retList = await fn({ db, axi, });
             retList.forEach(ret => {
-                if (ret.expect === ret.calc) {
+                let flag: boolean = true;
+
+                if (Array.isArray(ret.expect)) {
+                    flag = !ret.expect.some((n, i) => {
+                        if (ret.calc[i] !== ret.expect[i]) {
+                            return true;
+                        }
+                    });
+                } else {
+                    flag = ret.expect === ret.calc;
+                }
+                if (flag) {
                     console.log(chalk.whiteBright('.'));
                 } else {
                     console.log(chalk.red(`${ret.title}::${ret.expect}::${ret.calc}`));
@@ -40,6 +53,12 @@ async function main() {
     }
     await db.close();
 
+}
+
+function filter(keyword: string): string[] {
+    let ret: string[];
+    ret = files.filter(n => n.indexOf(keyword) >= 0);
+    return ret;
 }
 
 main();
