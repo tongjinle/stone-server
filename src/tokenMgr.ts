@@ -54,19 +54,23 @@ export default class TokenMgr {
         return this.dict[token] && this.dict[token].expires > Date.now();
     }
 
+
+
     // 绑定openId,生成token
-    bind(openId: string): string {
+    bind(openId: string, ): string {
+        if(openId===undefined){
+          return undefined;
+        }
         // 使用缓存的未过期的token
         {
             let token = this.opDict[openId];
-            if(this.check(token)){
+            if (this.check(token)) {
                 return token;
             }
         }
         // 创建token
         const duration = config.tokenExpires;
         let token: string = Math.floor((10e8 * Math.random())).toString(16).slice(0, 8);
-        console.log({openId,token,});
         this.dict[token] = { openId, expires: Date.now() + duration, };
         this.opDict[openId] = token;
         return token;
@@ -74,7 +78,7 @@ export default class TokenMgr {
 
     // 通过token查询openId
     get(token: string): string {
-        return this.dict[token].openId;
+        return this.dict[token] && this.dict[token].openId;
     }
 
 

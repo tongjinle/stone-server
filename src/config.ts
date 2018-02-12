@@ -71,6 +71,14 @@ let config = {
         roomInvalid: 300,
         notAdmin:500,
     },
+
+    // admin
+    adminList:[
+        {
+            userName:'admin',
+            password:'dota123',
+        },
+    ]
 };
 
 let isTest: boolean = process.argv[2] == '-t';

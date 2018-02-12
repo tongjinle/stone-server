@@ -14,7 +14,7 @@ let dir = path.resolve(__dirname, './spec');
 let files = glob.sync(dir + '/**/*[sS]pec.js');
 console.log('files:', files);
 
-files = filter('itemSpec');
+// files = filter('itemSpec');
 
 
 let { apiPrefix, } = config;

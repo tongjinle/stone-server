@@ -43,13 +43,13 @@ class Main {
     constructor() {
 
         let app = this.app = express();
-           
+
 
         this.initHttpRoute();
 
         let a = express();
         Http.createServer();
-       
+
 
 
     }
@@ -61,7 +61,7 @@ class Main {
         app.use(bodyParser.urlencoded({ extended: true }));
 
         app.use((req, res, next) => {
-            console.log('req.path', req.path);
+            loger.info('req.path', req.path, req.method);
             if (req.method == 'OPTIONS') {
                 console.log('options...')
                 next();
@@ -101,9 +101,9 @@ class Main {
         });
     }
 
-    
 
-   
+
+
 
 
 }

@@ -34,6 +34,20 @@ export async function createUser(axi: axiosNs.AxiosInstance, dotaId: string): Pr
 
 }
 
+export async function createAdmin(userName: string, password: string, ): Promise<axiosNs.AxiosInstance> {
+    let axi = axiosNs.default.create();
+    let url = apiPrefix + 'admin/login';
+    let { data, } = await axi.post(url, { userName, password, }) as { data: Protocol.IResAdminLogin, };
+
+    axi.interceptors.request.use(cfg => {
+        console.log(data);
+        cfg.headers['token'] = data.token;
+        return cfg;
+    });
+    return axi;
+}
+
+
 
 export function delay(ms: number): Promise<void> {
     return new Promise(resolve => {

@@ -259,6 +259,17 @@ export interface IResWxUserInfo extends IResBase {
 }
 
 
+// admin
+// login
+export interface IReqAdminLogin {
+    userName: string,
+    password: string,
+}
+
+export interface IResAdminLogin extends IResBase {
+    token?: string,
+}
+
 
 
 

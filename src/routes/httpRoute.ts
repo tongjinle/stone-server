@@ -6,6 +6,7 @@ import config from '../config';
 // import DbMgr from '../dbMgr';
 import loger from '../logIns';
 import TokenMgr from '../tokenMgr';
+import AdminMgr from '../adminMgr';
 import Database from '../db';
 
 // 路由
@@ -19,6 +20,7 @@ import checkHandle from './checkHandle';
 import itemHandle from './itemHandle';
 import tokenHandle from './tokenHandle';
 import roomHandle from './roomHandle';
+import adminHandle from './adminHandle';
 
 
 // *** 仅仅在开发时期供前端刷新数据所用
@@ -29,11 +31,11 @@ const { rege } = config;
 export default function handler(app: express.Express) {
     // bind需要token
     app.use(async (req, res, next) => {
-        if (/\/bind$|\/getOpenId|\/auth\//.test(req.path)) {
+        if (/\/bind$|\/getOpenId|\/auth\/|\/admin\/(?!login)/.test(req.path)) {
             let token: string = req.headers['token'] as string;
             let openId: string = req.headers['openId'] = TokenMgr.getIns().get(token);
-            
-            console.log({token});
+
+            console.log({ token });
             if (!TokenMgr.getIns().check(token)) {
                 res.json({ code: config.commonErrCode.tokenInvalid, });
                 return;
@@ -90,24 +92,22 @@ export default function handler(app: express.Express) {
     });
 
     // 错误码500
-    app.use(async(req,res,next)=>{
+    app.use(async (req, res, next) => {
         let matchList = [
-            /\/admin\//,
+            /\/admin\/(?!login)/,
         ];
 
         if (matchList.some(n => n.test(req.path))) {
             let db = await Database.getIns();
+            let token: string = req.headers['token'] as string;
 
-            let openId: string = req.headers['openId'] as string;
-            let { user } = await db.queryUser({ openId, });
-            // 存在当前黑店
-            if (user.currRoomId != undefined) {
-                let { room } = await db.queryRoom({ roomId: user.currRoomId, });
-                if (!!room) {
-                    let code: number = config.commonErrCode.notAdmin;
-                    res.json({ code, });
-                    return;
-                }
+            let userName: string = TokenMgr.getIns().get(token);
+
+
+            if (!(userName && config.adminList.some(n => n.userName == userName))) {
+                let code: number = config.commonErrCode.notAdmin;
+                res.json({ code, });
+                return;
             }
         }
         next();
@@ -137,6 +137,9 @@ export default function handler(app: express.Express) {
 
     // 黑店
     roomHandle(app);
+
+    // admin
+    adminHandle(app);
 
 
 
