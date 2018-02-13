@@ -349,7 +349,7 @@ export default class Database {
             if (room.owner == openId) {
                 await this.roomCollection.updateOne({ _id: new mongodb.ObjectId(roomId), }, { $set: { ownerDotaId: dotaId, }, });
             } else if (room.mateList.some(n => n.openId == openId)) {
-                await this.roomCollection.updateOne({ $and: { _id: new mongodb.ObjectId(roomId), "mateList.openId": openId, } }, { $set: { dotaId, }, });
+                await this.roomCollection.updateOne({ $and: [{ _id: new mongodb.ObjectId(roomId) }, { "mateList.openId": openId, },] }, { $set: { "mateList.$.dotaId": dotaId, }, });
             }
         }
         return { flag, };

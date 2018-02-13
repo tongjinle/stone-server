@@ -40,7 +40,6 @@ export async function createAdmin(userName: string, password: string, ): Promise
     let { data, } = await axi.post(url, { userName, password, }) as { data: Protocol.IResAdminLogin, };
 
     axi.interceptors.request.use(cfg => {
-        console.log(data);
         cfg.headers['token'] = data.token;
         return cfg;
     });

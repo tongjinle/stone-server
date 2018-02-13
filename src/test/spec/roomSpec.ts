@@ -236,14 +236,37 @@ let fn: ITestFunc = async function({ db, axi, }) {
         let data = await commentRoom(puman, roomId, comment);
         ret.push({ title: '黑店超过评价时间了,不能评价', expect: 2, calc: data.code });
 
-        await utils.delay(2*config.clearRoom.interval);
-        let {room,} = await db.queryRoom({roomId,});
+        await utils.delay(2 * config.clearRoom.interval);
+        let { room, } = await db.queryRoom({ roomId, });
         let openId = await utils.getOpenId(puman);
-        let flag:boolean = room.commentList.some(n=>n.openId == openId && n.comment == 1 );
+        let flag: boolean = room.commentList.some(n => n.openId == openId && n.comment == 1);
         ret.push({ title: '黑店超过评价时间了,会自动评价', expect: true, calc: flag });
 
         let { user, } = await db.queryUser({ openId, });
-        ret.push({title:'黑店超过评价时间了,参与者的当前黑店的状态自动解除',expect:undefined,calc:user.currRoomId,});
+        ret.push({ title: '黑店超过评价时间了,参与者的当前黑店的状态自动解除', expect: undefined, calc: user.currRoomId, });
+
+    }
+
+    {
+        // puman参加了一个黑店
+        // 然后修改了自己的dotaId
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 2, 10);
+
+        let puman = await utils.getAxios('123456');
+        await utils.createUser(puman, '123');
+
+        await applyRoom(puman, roomId);
+        let { room: lastRoom, } = await db.queryRoom({ roomId, });
+
+        await puman.post(apiPrefix + 'bind', { dotaId: '321', });
+        let { room: currRoom, } = await db.queryRoom({ roomId, });
+
+        ret.push({ title: '参加了黑店,重新绑定dotaId', expect: [true, true,], calc: [lastRoom.mateList.some(n => n.dotaId === '123'), currRoom.mateList.some(n => n.dotaId === '321')], });
+
 
     }
 
