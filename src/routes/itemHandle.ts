@@ -7,7 +7,7 @@ import Database from '../db';
 enum eBuyItemCode {
     notEnoughMoney,
     notExists,
-    other,
+    insertShopRecordFail,
 }
 
 export default function handle(app: express.Express) {
@@ -90,7 +90,7 @@ export default function handle(app: express.Express) {
         let buyTime: number = Date.now();
         let{flag,shopId,} = await db.insertShopRecord({ openId, itemName: name, buyTime });
         if(!flag){
-            code = eBuyItemCode.other;
+            code = eBuyItemCode.insertShopRecordFail;
             resData = { code, };
             res.json(resData);
             return;

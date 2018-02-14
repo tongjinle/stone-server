@@ -23,12 +23,11 @@ export default function handle(app: express.Express) {
         let resData: Protocol.IResCanCheck;
         let openId: string = req.headers['openId'] as string;
 
-        let flag: boolean = true;
         let code: number = undefined;
 
         code = await hasCheck(openId) ? 0 : undefined;
 
-        resData = { flag, code, };
+        resData = { code, };
         res.json(resData);
     });
 

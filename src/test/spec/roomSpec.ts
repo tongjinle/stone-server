@@ -68,6 +68,8 @@ let fn: ITestFunc = async function({ db, axi, }) {
     // !失败,自己不能参加自己的黑店
     // dino参加黑店ra
     // !成功
+    // dino已经参加了他人的黑店,自己再建立黑店
+    // !失败
     // tong建立黑店,记作rb
     // tong参加黑店ra
     // !失败,自己已经有黑店了
@@ -94,6 +96,11 @@ let fn: ITestFunc = async function({ db, axi, }) {
         {
             let data = await applyRoom(dino, roomId);
             ret.push({ title: 'dino参加puman的黑店-成功', expect: undefined, calc: data.code, });
+        }
+
+        {
+            let data = await createRoom(dino, 2, 10);
+            ret.push({ title: 'dino已经参加了他人的黑店,自己再建立黑店', expect: 200, calc: data.code, });
         }
 
         let { id: otherRoomId, } = await createRoom(tong, 10, 1);
@@ -268,6 +275,64 @@ let fn: ITestFunc = async function({ db, axi, }) {
         ret.push({ title: '参加了黑店,重新绑定dotaId', expect: [true, true,], calc: [lastRoom.mateList.some(n => n.dotaId === '123'), currRoom.mateList.some(n => n.dotaId === '321')], });
 
 
+    }
+    {
+        // puman创建了一个黑店
+        // 然后修改了自己的dotaId
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        let puman = await utils.getAxios('123456');
+        await utils.createUser(puman, '123');
+
+
+        let { id: roomId, } = await createRoom(puman, 2, 10);
+
+
+        let { room: lastRoom, } = await db.queryRoom({ roomId, });
+
+        await puman.post(apiPrefix + 'bind', { dotaId: '321', });
+        let { room: currRoom, } = await db.queryRoom({ roomId, });
+
+        ret.push({ title: '参加了黑店,重新绑定dotaId', expect: ['123', '321',], calc: [lastRoom.ownerDotaId, currRoom.ownerDotaId,]});
+
+
+    }
+
+    {
+        await db.removeUserAll();
+        await db.removeRoomAll();
+
+        await utils.createUser(axi, '654321');
+        let { id: roomId, } = await createRoom(axi, 3, 10);
+
+        let puman = await utils.getAxios('puman');
+        await utils.createUser(puman, '123456');
+
+        let puman1 = await utils.getAxios('puman1');
+        await utils.createUser(puman1, '1234561');
+
+        let puman2 = await utils.getAxios('puman2');
+        await utils.createUser(puman2, '1234562');
+
+        await applyRoom(puman, roomId);
+        await applyRoom(puman1, roomId);
+        await applyRoom(puman2, roomId);
+
+        let now: number = Date.now();
+        let createTime: number = now - config.roomEndTime - config.commentBeginTime - 5 * 60 * 1000;
+        await updateRoomTime(db, roomId, createTime);
+
+        await commentRoom(puman, roomId, 1);
+        await commentRoom(puman1, roomId, 1);
+        await commentRoom(puman2, roomId, -1);
+
+
+        {
+            let { data, } = await axi.get(apiPrefix + 'auth/room/info' + '?' + qs.stringify({ roomId, })) as { data: Protocol.IResRoomInfo, };
+            let { good, normal, bad, } = data.info.comment;
+            ret.push({ title: '黑店信息统计', expect: [2, 0, 1], calc: [good, normal, bad,] });
+        }
     }
 
 

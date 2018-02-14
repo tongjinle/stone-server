@@ -85,8 +85,7 @@ export interface IReqCanCheck {
 
 };
 export interface IResCanCheck extends IResBase {
-    // 今日是否能签到
-    flag: boolean,
+    
 };
 
 

@@ -5,10 +5,8 @@ import * as Struct from '../struct';
 import Database from '../db';
 
 enum eCreateRoomCode {
-    // 已经创建了黑店
-    hasCreated,
-    // 已经加入他人的黑店
-    hasJoined,
+    // 参数不合法
+    invalidParams,
 };
 
 enum eQueryRoomCode {
@@ -56,7 +54,10 @@ export default function handle(app: express.Express) {
         let { count, coin, } = req.body as Protocol.IReqCreateRoom;
         let code: number = undefined;
 
+        if (!(/^\d+$/.test(count + '') && /^\d+$/.test(coin + ''))){
+            code = eCreateRoomCode.invalidParams;
 
+        }
         let db = await Database.getIns();
 
         let beginTime: number = Date.now(),
