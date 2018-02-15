@@ -37,7 +37,7 @@ let config = {
     commentEndTime: 3 * HOUR,
 
     // *** 数据库
-    connectStr: 'mongodb://sa:sa@118.31.11.29:27017/admin',
+    connectStr: 'mongodb://tongjinle:tongjinle19840118@118.31.11.29:27017/dota',
 
     // *** api 
     apiPrefix: 'http://api.puman.xyz:3000/',
@@ -87,7 +87,7 @@ if (isTest) {
     config = Object.assign(config, {
         isMockOpenId: true,
         apiPrefix: 'http://localhost:3000/',
-        connectStr: 'mongodb://sa:sa@localhost:27017/admin',
+        connectStr: 'mongodb://tongjinle:tongjinle19840118@localhost:27017/dota',
 
         clearRoom: {
             // 清理个数
